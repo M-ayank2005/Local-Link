@@ -13,8 +13,8 @@ Navigate to the main Local Links repository on GitHub and click the **"Fork"** b
 Next, clone the forked repository to your local machine:
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/local_links.git
-cd local_links
+git clone https://github.com/YOUR-USERNAME/local_link.git
+cd local_link
 ```
 
 *(Note: Replace `YOUR-USERNAME` with your actual GitHub username and adjust the repo name if necessary).*

@@ -12,9 +12,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Mount routers (Example)
-// app.use('/api/v1/commerce', require('./routes/commerce'));
+app.use('/api/v1/commerce', require('./routes/commerce/commerceRoutes'));
+app.use('/api/v1/shopkeeper', require('./routes/commerce/shopkeeperRoutes'));
+app.use('/api/v1/admin', require('./routes/commerce/adminRoutes'));
 
+// Existing root route
 app.get('/health', (req, res) => {
   res.send('Local Links API is running...');
 });
