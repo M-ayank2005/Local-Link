@@ -1,6 +1,4 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import {
   ShoppingBag,
   Leaf,
@@ -11,36 +9,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
-const SERVER_API_BASE = process.env.BACKEND_URL || 'http://localhost:5001/api';
-
-async function ensureAuthenticated() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
-
-  if (!token) {
-    redirect('/auth');
-  }
-
-  try {
-    const response = await fetch(`${SERVER_API_BASE}/auth/me`, {
-      method: 'GET',
-      cache: 'no-store',
-      headers: {
-        Cookie: `token=${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      redirect('/auth');
-    }
-  } catch (_error) {
-    redirect('/auth');
-  }
-}
-
-export default async function HomePage() {
-  await ensureAuthenticated();
-
+export default function HomePage() {
   const modules = [
     {
       title: 'Apartment Commerce',

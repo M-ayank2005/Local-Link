@@ -1,31 +1,72 @@
 import { NextResponse } from 'next/server';
 
-const PROTECTED_PREFIXES = ['/home', '/commerce', '/profile', '/admin', '/dashboard'];
+const PROTECTED_PREFIXES = ['/', '/home', '/commerce', '/profile', '/admin', '/dashboard'];
+const PUBLIC_AUTH_PAGES = ['/login', '/auth', '/landing'];
 
-export function middleware(request) {
-  const { pathname, search } = request.nextUrl;
+const API_BASE_URL =
+  process.env.BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  'http://localhost:5001/api';
 
-  const isProtectedRoute = PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
-
-  if (!isProtectedRoute) {
-    return NextResponse.next();
+async function isAuthenticated(request) {
+  const token = request.cookies.get('token')?.value;
+  if (!token) {
+    return false;
   }
 
-  const token = request.cookies.get('token')?.value;
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      method: 'GET',
+      headers: {
+        Cookie: `token=${token}`,
+      },
+      cache: 'no-store',
+    });
 
-  if (!token) {
-    const loginUrl = new URL('/auth', request.url);
-    if (pathname && pathname !== '/auth') {
-      loginUrl.searchParams.set('next', `${pathname}${search || ''}`);
+    return response.ok;
+  } catch (_error) {
+    return false;
+  }
+}
+
+export async function middleware(request) {
+  const { pathname, search } = request.nextUrl;
+  const loggedIn = await isAuthenticated(request);
+
+  const isProtectedRoute = PROTECTED_PREFIXES.some((prefix) => {
+    if (prefix === '/') {
+      return pathname === '/';
     }
-    return NextResponse.redirect(loginUrl);
+    return pathname === prefix || pathname.startsWith(`${prefix}/`);
+  });
+
+  const isPublicAuthPage = PUBLIC_AUTH_PAGES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+
+  if (loggedIn && isPublicAuthPage) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  if (!loggedIn && isProtectedRoute) {
+    const landingUrl = new URL('/landing', request.url);
+    landingUrl.searchParams.set('next', `${pathname}${search || ''}`);
+    return NextResponse.redirect(landingUrl);
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/home/:path*', '/commerce/:path*', '/profile/:path*', '/admin/:path*', '/dashboard/:path*'],
+  matcher: [
+    '/',
+    '/login/:path*',
+    '/auth/:path*',
+    '/landing/:path*',
+    '/home/:path*',
+    '/commerce/:path*',
+    '/profile/:path*',
+    '/admin/:path*',
+    '/dashboard/:path*',
+  ],
 };

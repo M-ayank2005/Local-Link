@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Pencil, X } from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5001/api";
 
@@ -27,19 +28,13 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
   });
   const [passwordBusy, setPasswordBusy] = useState(false);
-
-  const [forgotEmail, setForgotEmail] = useState("");
-  const [resetToken, setResetToken] = useState("");
-  const [resetPassword, setResetPassword] = useState("");
-  const [forgotBusy, setForgotBusy] = useState(false);
-  const [resetBusy, setResetBusy] = useState(false);
-  const [issuedResetToken, setIssuedResetToken] = useState("");
 
   const previewImage = useMemo(() => editForm.profileImage || "", [editForm.profileImage]);
 
@@ -68,7 +63,7 @@ export default function ProfilePage() {
       });
 
       if (!response.ok) {
-        window.location.assign("/auth");
+        window.location.assign("/landing");
         return;
       }
 
@@ -76,7 +71,6 @@ export default function ProfilePage() {
       const normalized = normalizeProfile(data.user);
       setProfile(normalized);
       setEditForm(normalized);
-      setForgotEmail(normalized.email);
     } catch (_err) {
       setError("Unable to load profile details.");
     } finally {
@@ -108,9 +102,7 @@ export default function ProfilePage() {
 
   const onImageFileChange = (event) => {
     const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     if (!file.type.startsWith("image/")) {
       setError("Please select a valid image file.");
@@ -123,6 +115,19 @@ export default function ProfilePage() {
       setEditForm((prev) => ({ ...prev, profileImage: base64 }));
     };
     reader.readAsDataURL(file);
+  };
+
+  const startEditing = () => {
+    setError("");
+    setSuccess("");
+    setEditForm(profile);
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setEditForm(profile);
+    setIsEditing(false);
+    setError("");
   };
 
   const saveProfile = async (event) => {
@@ -157,6 +162,7 @@ export default function ProfilePage() {
       setProfile(normalized);
       setEditForm(normalized);
       setSuccess("Profile updated successfully.");
+      setIsEditing(false);
     } catch (_err) {
       setError("Profile update failed. Please try again.");
     } finally {
@@ -196,70 +202,6 @@ export default function ProfilePage() {
     }
   };
 
-  const submitForgotPassword = async (event) => {
-    event.preventDefault();
-    setError("");
-    setSuccess("");
-
-    try {
-      setForgotBusy(true);
-      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: forgotEmail.trim() }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "Unable to generate reset token.");
-        return;
-      }
-
-      setIssuedResetToken(data.resetToken || "");
-      setSuccess("Reset token generated. Use it in the reset form below.");
-    } catch (_err) {
-      setError("Unable to generate reset token.");
-    } finally {
-      setForgotBusy(false);
-    }
-  };
-
-  const submitResetPassword = async (event) => {
-    event.preventDefault();
-    setError("");
-    setSuccess("");
-
-    try {
-      setResetBusy(true);
-      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token: resetToken.trim(), newPassword: resetPassword }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "Reset password failed.");
-        return;
-      }
-
-      setResetToken("");
-      setResetPassword("");
-      setIssuedResetToken("");
-      setSuccess("Password reset successful. Please login again if required.");
-    } catch (_err) {
-      setError("Reset password failed.");
-    } finally {
-      setResetBusy(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -271,12 +213,33 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-emerald-50 dark:from-background dark:via-background dark:to-background text-foreground transition-colors duration-300">
       <div className="container mx-auto px-4 py-10 md:py-16 max-w-6xl space-y-8">
-        <div>
-          <p className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm tracking-wide mb-3">
-            My Account
-          </p>
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">Profile Settings</h1>
-          <p className="text-muted-foreground mt-2">Manage profile photo, account details and password.</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm tracking-wide mb-3">
+              My Account
+            </p>
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">Profile Settings</h1>
+            <p className="text-muted-foreground mt-2">Manage profile photo and account details.</p>
+          </div>
+          {!isEditing ? (
+            <button
+              type="button"
+              onClick={startEditing}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-sm hover:bg-muted transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+              Edit
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={cancelEditing}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-sm hover:bg-muted transition-colors"
+            >
+              <X className="w-4 h-4" />
+              Cancel
+            </button>
+          )}
         </div>
 
         {error ? <div className="p-3 text-sm bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-lg">{error}</div> : null}
@@ -284,22 +247,24 @@ export default function ProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 bg-white/70 dark:bg-card border rounded-3xl p-6 md:p-8 shadow-xl backdrop-blur-md">
-            <h2 className="text-2xl font-bold mb-1">Edit Details</h2>
-            <p className="text-sm text-muted-foreground mb-6">Update your personal information.</p>
+            <h2 className="text-2xl font-bold mb-1">Profile Details</h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              {isEditing ? "Edit and save your details." : "Click the pen icon to edit your details."}
+            </p>
 
             <form onSubmit={saveProfile} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Full Name</label>
-                  <input name="fullName" value={editForm.fullName} onChange={onEditChange} className="mt-1 w-full p-3 rounded-xl border bg-background" required />
+                  <input name="fullName" value={editForm.fullName} onChange={onEditChange} disabled={!isEditing} className="mt-1 w-full p-3 rounded-xl border bg-background disabled:bg-muted/50" required />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Email (read-only)</label>
+                  <label className="text-sm font-medium">Email</label>
                   <input value={editForm.email} readOnly className="mt-1 w-full p-3 rounded-xl border bg-muted/50" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Phone</label>
-                  <input name="phone" value={editForm.phone} onChange={onEditChange} className="mt-1 w-full p-3 rounded-xl border bg-background" required />
+                  <input name="phone" value={editForm.phone} onChange={onEditChange} disabled={!isEditing} className="mt-1 w-full p-3 rounded-xl border bg-background disabled:bg-muted/50" required />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Role</label>
@@ -307,25 +272,27 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Street</label>
-                  <input name="street" value={editForm.address.street} onChange={onEditChange} className="mt-1 w-full p-3 rounded-xl border bg-background" />
+                  <input name="street" value={editForm.address.street} onChange={onEditChange} disabled={!isEditing} className="mt-1 w-full p-3 rounded-xl border bg-background disabled:bg-muted/50" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">City</label>
-                  <input name="city" value={editForm.address.city} onChange={onEditChange} className="mt-1 w-full p-3 rounded-xl border bg-background" />
+                  <input name="city" value={editForm.address.city} onChange={onEditChange} disabled={!isEditing} className="mt-1 w-full p-3 rounded-xl border bg-background disabled:bg-muted/50" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">State</label>
-                  <input name="state" value={editForm.address.state} onChange={onEditChange} className="mt-1 w-full p-3 rounded-xl border bg-background" />
+                  <input name="state" value={editForm.address.state} onChange={onEditChange} disabled={!isEditing} className="mt-1 w-full p-3 rounded-xl border bg-background disabled:bg-muted/50" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Pincode</label>
-                  <input name="pincode" value={editForm.address.pincode} onChange={onEditChange} className="mt-1 w-full p-3 rounded-xl border bg-background" />
+                  <input name="pincode" value={editForm.address.pincode} onChange={onEditChange} disabled={!isEditing} className="mt-1 w-full p-3 rounded-xl border bg-background disabled:bg-muted/50" />
                 </div>
               </div>
 
-              <button disabled={saving} className="px-5 py-3 rounded-xl font-semibold text-primary-foreground bg-primary hover:bg-primary/90 transition-all disabled:opacity-70">
-                {saving ? "Saving..." : "Save Details"}
-              </button>
+              {isEditing ? (
+                <button disabled={saving} className="px-5 py-3 rounded-xl font-semibold text-primary-foreground bg-primary hover:bg-primary/90 transition-all disabled:opacity-70">
+                  {saving ? "Saving..." : "Save Details"}
+                </button>
+              ) : null}
             </form>
           </div>
 
@@ -340,13 +307,14 @@ export default function ProfilePage() {
                   <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">No Image</div>
                 )}
               </div>
-              <input type="file" accept="image/*" onChange={onImageFileChange} className="w-full text-sm mb-2" />
+              <input type="file" accept="image/*" onChange={onImageFileChange} disabled={!isEditing} className="w-full text-sm mb-2 disabled:opacity-60" />
               <input
                 name="profileImage"
                 value={editForm.profileImage}
                 onChange={onEditChange}
+                disabled={!isEditing}
                 placeholder="Or paste image URL"
-                className="w-full p-3 rounded-xl border bg-background text-sm"
+                className="w-full p-3 rounded-xl border bg-background text-sm disabled:bg-muted/50"
               />
             </div>
 
@@ -360,10 +328,10 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {isEditing ? (
           <div className="bg-white/70 dark:bg-card border rounded-3xl p-6 shadow-xl backdrop-blur-md">
             <h3 className="text-xl font-bold mb-3">Change Password</h3>
-            <form onSubmit={submitChangePassword} className="space-y-3">
+            <form onSubmit={submitChangePassword} className="space-y-3 max-w-xl">
               <input
                 type="password"
                 placeholder="Current password"
@@ -386,52 +354,7 @@ export default function ProfilePage() {
               </button>
             </form>
           </div>
-
-          <div className="bg-white/70 dark:bg-card border rounded-3xl p-6 shadow-xl backdrop-blur-md">
-            <h3 className="text-xl font-bold mb-3">Forgot Password</h3>
-            <form onSubmit={submitForgotPassword} className="space-y-3 mb-4">
-              <input
-                type="email"
-                placeholder="Registered email"
-                value={forgotEmail}
-                onChange={(e) => setForgotEmail(e.target.value)}
-                className="w-full p-3 rounded-xl border bg-background"
-                required
-              />
-              <button disabled={forgotBusy} className="px-4 py-2.5 rounded-xl border hover:bg-muted transition-colors disabled:opacity-70">
-                {forgotBusy ? "Generating..." : "Generate Reset Token"}
-              </button>
-            </form>
-
-            {issuedResetToken ? (
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm mb-4 break-all">
-                <span className="font-semibold">Reset token:</span> {issuedResetToken}
-              </div>
-            ) : null}
-
-            <form onSubmit={submitResetPassword} className="space-y-3">
-              <input
-                placeholder="Reset token"
-                value={resetToken}
-                onChange={(e) => setResetToken(e.target.value)}
-                className="w-full p-3 rounded-xl border bg-background"
-                required
-              />
-              <input
-                type="password"
-                placeholder="New password"
-                value={resetPassword}
-                onChange={(e) => setResetPassword(e.target.value)}
-                className="w-full p-3 rounded-xl border bg-background"
-                minLength={6}
-                required
-              />
-              <button disabled={resetBusy} className="px-4 py-2.5 rounded-xl font-semibold text-primary-foreground bg-primary hover:bg-primary/90 transition-all disabled:opacity-70">
-                {resetBusy ? "Resetting..." : "Reset Password"}
-              </button>
-            </form>
-          </div>
-        </div>
+        ) : null}
       </div>
     </div>
   );

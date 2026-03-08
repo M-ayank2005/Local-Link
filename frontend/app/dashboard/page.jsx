@@ -18,7 +18,7 @@ async function ensureAuthenticated() {
   const token = cookieStore.get('token')?.value;
 
   if (!token) {
-    redirect('/auth');
+    redirect('/landing');
   }
 
   try {
@@ -31,10 +31,10 @@ async function ensureAuthenticated() {
     });
 
     if (!response.ok) {
-      redirect('/auth');
+      redirect('/landing');
     }
   } catch (_error) {
-    redirect('/auth');
+    redirect('/landing');
   }
 }
 

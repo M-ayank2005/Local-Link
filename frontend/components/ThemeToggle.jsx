@@ -21,7 +21,7 @@ export function ThemeToggle() {
 
   useEffect(() => {
     const loadUser = async () => {
-      if (pathname === "/auth") {
+      if (pathname === "/login" || pathname === "/auth") {
         setUserName("");
         return;
       }
@@ -62,22 +62,22 @@ export function ThemeToggle() {
     } finally {
       setIsLoggingOut(false);
       setUserName("");
-      router.replace("/auth");
+      router.replace("/landing");
       router.refresh();
     }
   };
 
-  const showAuthButton = pathname !== "/auth" && !userName;
-  const showAccountButtons = pathname !== "/auth" && !!userName;
+  const showSignupButton = pathname === "/landing" && !userName;
+  const showAccountButtons = pathname !== "/landing" && pathname !== "/login" && !!userName;
 
   return (
     <div className="flex items-center gap-2">
-      {showAuthButton ? (
+      {showSignupButton ? (
         <Link
-          href="/auth"
+          href="/login?mode=signup"
           className="px-3 py-1.5 rounded-md border text-sm hover:bg-muted transition-colors"
         >
-          Login / Signup
+          Signup
         </Link>
       ) : null}
       {showAccountButtons ? (
