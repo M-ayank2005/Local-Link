@@ -1,5 +1,5 @@
 const Service = require('../../models/skills/Service');
-const Booking = require('../../models/skills/Booking');
+const SkillBooking = require('../../models/skills/Booking');
 const Review = require('../../models/skills/Review');
 
 // @desc    Get all services with filters
@@ -307,7 +307,7 @@ exports.createBooking = async (req, res) => {
     const totalAmount = service.pricePerHour * (duration || 1);
     const advancePayment = Math.ceil(totalAmount * 0.2); // 20% advance
 
-    const booking = await Booking.create({
+    const newBooking = await SkillBooking.create({
       service: serviceId,
       provider: service.provider,
       customer: req.user._id,
@@ -331,7 +331,7 @@ exports.createBooking = async (req, res) => {
       $inc: { totalBookings: 1 },
     });
 
-    const populatedBooking = await Booking.findById(booking._id)
+    const populatedBooking = await SkillBooking.findById(newBooking._id)
       .populate('service', 'title category pricePerHour')
       .populate('provider', 'fullName phone')
       .populate('customer', 'fullName phone');
@@ -365,7 +365,7 @@ exports.getMyBookings = async (req, res) => {
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    const bookings = await Booking.find(query)
+    const bookings = await SkillBooking.find(query)
       .populate('service', 'title category pricePerHour images')
       .populate('provider', 'fullName phone profileImage')
       .sort({ createdAt: -1 })

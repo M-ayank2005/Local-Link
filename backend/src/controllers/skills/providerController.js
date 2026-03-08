@@ -1,5 +1,5 @@
 const Service = require('../../models/skills/Service');
-const Booking = require('../../models/skills/Booking');
+const SkillBooking = require('../../models/skills/Booking');
 const Review = require('../../models/skills/Review');
 
 // @desc    Create a new service
@@ -170,6 +170,44 @@ exports.getMyServices = async (req, res) => {
   }
 };
 
+// @desc    Get booking details (provider side)
+// @route   GET /api/v1/skills/provider/bookings/:id
+// @access  Private (Provider only)
+exports.getProviderBookingDetails = async (req, res) => {
+  try {
+    const booking = await SkillBooking.findById(req.params.id)
+      .populate('service', 'title category pricePerHour')
+      .populate('customer', 'fullName phone email profileImage');
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found',
+      });
+    }
+
+    // Check if provider owns this booking
+    if (booking.provider.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to view this booking',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: booking,
+    });
+  } catch (error) {
+    console.error('Error fetching provider booking details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching booking details',
+      error: error.message,
+    });
+  }
+};
+
 // @desc    Get provider's bookings
 // @route   GET /api/v1/skills/provider/bookings
 // @access  Private (Provider only)
@@ -184,17 +222,17 @@ exports.getProviderBookings = async (req, res) => {
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    const bookings = await Booking.find(query)
+    const bookings = await SkillBooking.find(query)
       .populate('service', 'title category pricePerHour')
       .populate('customer', 'fullName phone email profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit));
 
-    const total = await Booking.countDocuments(query);
+    const total = await SkillBooking.countDocuments(query);
 
     // Get stats
-    const stats = await Booking.aggregate([
+    const stats = await SkillBooking.aggregate([
       { $match: { provider: req.user._id } },
       {
         $group: {
@@ -234,7 +272,7 @@ exports.getProviderBookings = async (req, res) => {
 exports.updateBookingStatus = async (req, res) => {
   try {
     const { status, cancellationReason } = req.body;
-    const booking = await Booking.findById(req.params.id);
+    const booking = await SkillBooking.findById(req.params.id);
 
     if (!booking) {
       return res.status(404).json({
@@ -278,7 +316,7 @@ exports.updateBookingStatus = async (req, res) => {
 
     await booking.save();
 
-    const updatedBooking = await Booking.findById(booking._id)
+    const updatedBooking = await SkillBooking.findById(booking._id)
       .populate('service', 'title category')
       .populate('customer', 'fullName phone');
 
@@ -311,7 +349,7 @@ exports.getDashboardStats = async (req, res) => {
     });
 
     // Get bookings stats
-    const bookingStats = await Booking.aggregate([
+    const bookingStats = await SkillBooking.aggregate([
       { $match: { provider: providerId } },
       {
         $group: {

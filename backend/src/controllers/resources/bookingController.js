@@ -1,6 +1,6 @@
 const axios = require('axios');
 const Resource = require('../../models/resources/Resource');
-const Booking = require('../../models/resources/Booking');
+const ResourceBooking = require('../../models/resources/Booking');
 const DepositLedger = require('../../models/resources/DepositLedger');
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
@@ -21,7 +21,7 @@ const hasDateConflict = async (resourceId, fromDate, toDate, excludeBookingId = 
     ],
   };
   if (excludeBookingId) query._id = { $ne: excludeBookingId };
-  const count = await Booking.countDocuments(query);
+  const count = await ResourceBooking.countDocuments(query);
   return count > 0;
 };
 
@@ -73,7 +73,7 @@ exports.createBooking = async (req, res) => {
     let requiresExtraConfirmation = false;
 
     try {
-      const userBookingHistory = await Booking.find({ renter: userId });
+      const userBookingHistory = await ResourceBooking.find({ renter: userId });
       const totalBookings = userBookingHistory.length;
       const cancellations = userBookingHistory.filter((b) => b.status === 'cancelled').length;
       const noShows = userBookingHistory.filter(
@@ -112,7 +112,7 @@ exports.createBooking = async (req, res) => {
     }
 
     // Create booking
-    const booking = await Booking.create({
+    const booking = await ResourceBooking.create({
       resource: resourceId,
       renter: userId,
       fromDate: from,
@@ -166,7 +166,7 @@ exports.returnBooking = async (req, res) => {
       return res.status(400).json({ success: false, error: 'condition must be good or damaged' });
     }
 
-    const booking = await Booking.findById(req.params.id).populate('resource');
+    const booking = await ResourceBooking.findById(req.params.id).populate('resource');
     if (!booking) {
       return res.status(404).json({ success: false, error: 'Booking not found' });
     }
@@ -223,7 +223,7 @@ exports.returnBooking = async (req, res) => {
 exports.cancelBooking = async (req, res) => {
   try {
     const userId = req.user ? req.user._id.toString() : null;
-    const booking = await Booking.findById(req.params.id);
+    const booking = await ResourceBooking.findById(req.params.id);
 
     if (!booking) {
       return res.status(404).json({ success: false, error: 'Booking not found' });
@@ -289,7 +289,7 @@ exports.getMyBookings = async (req, res) => {
       return res.status(401).json({ success: false, error: 'Not authorized' });
     }
 
-    const bookings = await Booking.find({ renter: userId })
+    const bookings = await ResourceBooking.find({ renter: userId })
       .populate('resource', 'title category pricePerDay depositAmount images')
       .sort({ createdAt: -1 });
 

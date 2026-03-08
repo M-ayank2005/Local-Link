@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const depositLedgerSchema = new mongoose.Schema({
   booking: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Booking',
+    ref: 'ResourceBooking',
     required: true,
   },
   renter: {

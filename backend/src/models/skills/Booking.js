@@ -113,4 +113,4 @@ bookingSchema.index({ customer: 1, status: 1 });
 bookingSchema.index({ provider: 1, status: 1 });
 bookingSchema.index({ scheduledDate: 1 });
 
-module.exports = mongoose.models.Booking || mongoose.model('Booking', bookingSchema);
+module.exports = mongoose.models.SkillBooking || mongoose.model('SkillBooking', bookingSchema);
