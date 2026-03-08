@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MapPin, Clock, Leaf, PlusCircle, ArrowLeft, ShieldAlert, User } from 'lucide-react';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; 
   const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -45,7 +47,7 @@ export default function FoodFeed() {
 
   const fetchFood = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/food');
+      const response = await fetch(`${API_BASE_URL}/food`);
       const result = await response.json();
       setAvailableFoods(result.data || []);
       setLoading(false);
@@ -68,7 +70,7 @@ export default function FoodFeed() {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/food/${foodId}/claim`, {
+      const response = await fetch(`${API_BASE_URL}/food/${foodId}/claim`, {
         method: 'PUT',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -92,50 +94,39 @@ export default function FoodFeed() {
   if (loading) return <div className="min-h-screen flex items-center justify-center dark:bg-gray-950 dark:text-gray-400">Loading surplus food...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+    <div className="min-h-screen bg-transparent text-foreground transition-colors duration-300 relative">
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-400/20 dark:bg-emerald-600/20 blur-[120px] pointer-events-none -z-10 animate-pulse" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-teal-400/20 dark:bg-teal-600/10 blur-[100px] pointer-events-none -z-10 animate-pulse delay-1000" />
       
-      {/* Arena Navigation */}
-      <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex justify-between items-center sticky top-0 z-20 transition-colors duration-300">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition">
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="bg-emerald-100 dark:bg-emerald-900/30 p-1.5 rounded-lg">
-              <Leaf className="text-emerald-600 dark:text-emerald-400 w-6 h-6" />
+      <div className="container mx-auto p-4 md:p-8 space-y-8 relative z-10 w-full animate-in fade-in duration-500">
+        {/* Header Section */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/60 dark:bg-card/60 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-gray-200/50 dark:border-gray-800/50 shadow-sm">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 text-xs md:text-sm font-semibold mb-3">
+              <Leaf className="w-4 h-4" /> Food Rescue Network
             </div>
-            <h1 className="text-xl font-extrabold text-gray-800 dark:text-gray-100 hidden sm:block">
-              Food Waste Management
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight text-gray-900 dark:text-white">
+              Rescue Surplus. <span className="text-emerald-600 dark:text-emerald-400">Share Joy.</span>
             </h1>
+            <p className="text-muted-foreground mt-3 max-w-2xl text-sm md:text-base">
+              Browse fresh, leftover food from neighbors and local restaurants. Claim it before it goes to waste and help build a hunger-free community.
+            </p>
           </div>
-        </div>
-        
-        {isLoggedIn && (
-          <div className="flex items-center gap-3">
-             <Link href="/food/dashboard" className="flex items-center gap-2 bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 font-medium py-2 px-4 rounded-lg transition shadow-sm">
-              <User className="w-5 h-5" />
-              <span className="hidden sm:inline">My Dashboard</span>
-            </Link>
-            <Link href="/food/create" className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition shadow-sm">
-              <PlusCircle className="w-5 h-5" />
-              <span className="hidden sm:inline">Post Food</span>
-            </Link>
-          </div>
-        )}
-      </nav>
 
-      {/* Arena Hero Banner */}
-      <div className="bg-emerald-600 dark:bg-emerald-900 text-white py-12 px-8 shadow-inner">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-black mb-4">Rescue Surplus. Share Joy.</h2>
-          <p className="text-emerald-100 dark:text-emerald-200 text-lg max-w-2xl">
-            Browse fresh, leftover food from neighbors and local restaurants. Claim it before it goes to waste.
-          </p>
-        </div>
-      </div>
+          {isLoggedIn && (
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+               <Link href="/food/dashboard" className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold py-3 px-5 rounded-xl transition border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+                <User className="w-5 h-5" />
+                <span>My Dashboard</span>
+              </Link>
+              <Link href="/food/create" className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-5 rounded-xl transition shadow-sm hover:shadow-emerald-500/25 hover:-translate-y-0.5">
+                <PlusCircle className="w-5 h-5" />
+                <span>Post Food</span>
+              </Link>
+            </div>
+          )}
+        </header>
 
-      {/* Main Content Area */}
-      <div className="p-8 max-w-7xl mx-auto -mt-8 relative z-10">
         {!isLoggedIn && (
           <div className="mb-8 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-300 p-4 rounded-xl flex items-center gap-3 shadow-sm backdrop-blur-sm">
             <ShieldAlert className="w-6 h-6 flex-shrink-0" />
@@ -144,7 +135,7 @@ export default function FoodFeed() {
         )}
 
         {availableFoods.length === 0 ? (
-          <div className="text-center py-24 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors duration-300">
+          <div className="text-center py-24 bg-white/70 dark:bg-card/60 backdrop-blur-xl rounded-3xl border border-gray-200/50 dark:border-gray-800/50 shadow-xl transition-all duration-300">
             <Leaf className="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
             <p className="text-xl text-gray-500 dark:text-gray-400 font-medium">No surplus food available right now.</p>
             <p className="text-gray-400 dark:text-gray-500 mt-2">Check back later or post some yourself!</p>
@@ -162,7 +153,7 @@ export default function FoodFeed() {
               const validClaimQty = claimQuantities[food._id] || 1;
 
               return (
-                <div key={food._id} className={`bg-white dark:bg-gray-900 rounded-2xl shadow-sm overflow-hidden border transition-all duration-300 hover:shadow-md ${(isClaimed || isPickedUp) ? 'border-gray-200 dark:border-gray-800 opacity-60 dark:bg-gray-900/50' : 'border-gray-200 dark:border-gray-800'}`}>
+                <div key={food._id} className={`bg-white/60 dark:bg-card/60 backdrop-blur-md rounded-3xl shadow-sm overflow-hidden border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${(isClaimed || isPickedUp) ? 'border-gray-200/50 dark:border-gray-800/50 opacity-60 dark:bg-gray-900/30' : 'border-gray-200/50 dark:border-gray-800/50 hover:border-emerald-500/50'}`}>
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-3">
                       <h2 className={`text-xl font-bold line-clamp-1 ${(isClaimed || isPickedUp) ? 'text-gray-500 dark:text-gray-400' : 'text-gray-800 dark:text-gray-100'}`}>{food.title}</h2>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const PROTECTED_PREFIXES = ['/', '/home', '/commerce', '/emergency', '/profile', '/admin', '/dashboard', '/resources'];
+const PROTECTED_PREFIXES = ['/', '/commerce', '/emergency', '/profile', '/admin', '/dashboard', '/resources', '/skills', '/food'];
 const PUBLIC_AUTH_PAGES = ['/login', '/auth', '/landing'];
 
 const API_BASE_URL =
@@ -70,5 +70,7 @@ export const config = {
     '/admin/:path*',
     '/dashboard/:path*',
     '/resources/:path*',
+    '/skills/:path*',
+    '/food/:path*'
   ],
 };

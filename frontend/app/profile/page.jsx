@@ -211,8 +211,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-emerald-50 dark:from-background dark:via-background dark:to-background text-foreground transition-colors duration-300">
-      <div className="container mx-auto px-4 py-10 md:py-16 max-w-6xl space-y-8">
+    <div className="min-h-screen bg-transparent text-foreground transition-colors duration-300 relative overflow-hidden">
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/20 dark:bg-blue-600/20 blur-[120px] pointer-events-none -z-10 animate-pulse" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-indigo-400/20 dark:bg-indigo-600/10 blur-[100px] pointer-events-none -z-10 animate-pulse delay-1000" />
+      <div className="container mx-auto p-4 md:p-8 space-y-8 relative z-10 w-full animate-in fade-in duration-500">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm tracking-wide mb-3">

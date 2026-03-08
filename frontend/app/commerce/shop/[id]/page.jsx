@@ -16,17 +16,31 @@ export default function ShopInventoryPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Mock API call
-    setTimeout(() => {
-      setShop({ name: 'Fresh Veggies Mart', address: 'Block A, Ground Floor' });
-      setProducts([
-        { _id: 'p1', name: 'Tomatoes', price: 40, category: 'Vegetables', description: 'Fresh local tomatoes (1kg)' },
-        { _id: 'p2', name: 'Potatoes', price: 30, category: 'Vegetables', description: 'Organic potatoes (1kg)' },
-        { _id: 'p3', name: 'Onions', price: 35, category: 'Vegetables', description: 'Red onions (1kg)' },
-        { _id: 'p4', name: 'Milk', price: 65, category: 'Dairy', description: 'Full cream milk (1L)' },
-      ]);
-      setIsLoading(false);
-    }, 600);
+    const fetchShopDetails = async () => {
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+        const res = await fetch(`${API_BASE_URL}/v1/commerce/shops/${shopId}`);
+        if (res.ok) {
+          const json = await res.json();
+          const data = json.data || json; 
+          // The backend getShopAndInventory endpoint typically populates 'inventory' or 'products'
+          setShop({ 
+            name: data.name || data.shopName || 'Unknown Shop', 
+            address: data.address || 'Address not provided' 
+          });
+          setProducts(Array.isArray(data.inventory) ? data.inventory : Array.isArray(data.products) ? data.products : []);
+        } else {
+          console.error("Failed to fetch shop details");
+        }
+      } catch (err) {
+        console.error("Error fetching shop details", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (shopId) {
+      fetchShopDetails();
+    }
   }, [shopId]);
 
   const getItemQuantity = (productId) => {

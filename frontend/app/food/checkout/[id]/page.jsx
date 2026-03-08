@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, CreditCard } from 'lucide-react';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+
 // Inner component that uses useSearchParams (must be wrapped in Suspense)
 function CheckoutContent({ id }) {
   const router = useRouter();
@@ -15,7 +17,7 @@ function CheckoutContent({ id }) {
   const [paying, setPaying] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/food/${id}`)
+    fetch(`${API_BASE_URL}/food/${id}`)
       .then(res => res.json())
       .then(result => {
         if (result.success) setFood(result.data);
@@ -34,7 +36,7 @@ function CheckoutContent({ id }) {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/food/${id}/claim`, {
+      const response = await fetch(`${API_BASE_URL}/food/${id}/claim`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

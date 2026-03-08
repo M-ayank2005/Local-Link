@@ -37,18 +37,7 @@ export default function BookResourcePage() {
         if (!res.ok) throw new Error(data.error);
         setResource(data.data);
       } catch {
-        // Dev fallback
-        setResource({
-          _id: id,
-          title: 'Epson Projector 3000 Lumens',
-          category: 'projector',
-          condition: 'new',
-          pricePerDay: 200,
-          depositAmount: 2000,
-          owner: { fullName: 'Amit Shah' },
-          availableFrom: '2026-01-01',
-          availableTo: '2026-12-31',
-        });
+        setResource(null);
       } finally {
         setIsLoading(false);
       }

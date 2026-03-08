@@ -88,11 +88,11 @@ function BookingsContent() {
         const data = await response.json();
         setService(data.data);
       } else {
-        setService(getMockService());
+        setService(null);
       }
     } catch (error) {
       console.error('Error fetching service:', error);
-      setService(getMockService());
+      setService(null);
     }
   };
 
@@ -110,49 +110,17 @@ function BookingsContent() {
         const data = await response.json();
         setBookings(data.data || []);
       } else {
-        setBookings(getMockBookings());
+        setBookings([]);
       }
     } catch (error) {
       console.error('Error fetching bookings:', error);
-      setBookings(getMockBookings());
+      setBookings([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const getMockService = () => ({
-    _id: serviceId,
-    title: 'Expert Electrician Service',
-    category: 'electrician',
-    pricePerHour: 300,
-    rating: 4.8,
-    provider: { fullName: 'Rajesh Kumar', phone: '+91 98765 43210' },
-  });
-
-  const getMockBookings = () => [
-    {
-      _id: 'b1',
-      service: { title: 'Expert Electrician Service', category: 'electrician' },
-      provider: { fullName: 'Rajesh Kumar', phone: '+91 98765 43210' },
-      scheduledDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-      scheduledTime: { start: '10:00', end: '12:00' },
-      status: 'confirmed',
-      totalAmount: 600,
-      advancePayment: 120,
-      advancePaid: true,
-    },
-    {
-      _id: 'b2',
-      service: { title: 'Home Tutor - Math', category: 'tutor' },
-      provider: { fullName: 'Priya Sharma', phone: '+91 87654 32109' },
-      scheduledDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      scheduledTime: { start: '16:00', end: '18:00' },
-      status: 'completed',
-      totalAmount: 1000,
-      advancePayment: 200,
-      advancePaid: true,
-    },
-  ];
+// Removed getMockService and getMockBookings
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -218,21 +186,10 @@ function BookingsContent() {
       } else {
         const data = await response.json();
         setError(data.message || 'Failed to create booking');
-        // For demo, show success anyway
-        setSuccess(true);
-        setTimeout(() => {
-          setActiveTab('my');
-          setSuccess(false);
-        }, 2000);
       }
     } catch (error) {
       console.error('Error creating booking:', error);
-      // For demo, show success
-      setSuccess(true);
-      setTimeout(() => {
-        setActiveTab('my');
-        setSuccess(false);
-      }, 2000);
+      setError('Network error creating booking');
     } finally {
       setSubmitting(false);
     }

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ShoppingBag,
   Leaf,
@@ -54,28 +55,45 @@ export default function LandingPage({ searchParams }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-emerald-50 dark:from-background dark:via-background dark:to-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen bg-transparent text-foreground transition-colors duration-300 relative overflow-hidden">
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/20 dark:bg-primary/20 blur-[120px] pointer-events-none -z-10 animate-pulse" />
       <div className="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-purple-400/20 dark:bg-violet-500/10 blur-[100px] pointer-events-none -z-10 animate-pulse delay-1000" />
 
       <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl inset-0 z-10">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center mb-16">
-          <div className="lg:col-span-3 space-y-6">
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm tracking-wide mb-2">
-              Hyperlocal Services Platform
+          <div className="lg:col-span-3 space-y-2">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs tracking-widest uppercase mb-4 shadow-sm border border-primary/20">
+              The Next-Generation Neighborhood
             </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
-              Welcome to <span className="bg-gray-900/40 bg-clip-text text-transparent">Local Link</span>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[1.1] text-gray-900 dark:text-white">
+              Elevate Your <br className="hidden md:block"/>
+              <span className="bg-gradient-to-r from-primary via-violet-500 to-fuchsia-500 bg-clip-text text-transparent drop-shadow-sm">Local Living</span>
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl">
-              Explore all community services from one place. To use any service, continue to signup/login.
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mt-6 mb-8">
+              Welcome to a unified, hyper-local ecosystem. Discover seamless apartment commerce, peer-to-peer resource sharing, skill exchange, and vital emergency networks—all in one secure platform.
             </p>
-            <Link
-              href={signupLink}
-              className="inline-flex items-center px-5 py-3 rounded-xl font-semibold text-primary-foreground bg-primary hover:bg-primary/90 transition-all"
-            >
-              Sign up to Continue
-            </Link>
+            <div className="pt-4">
+              <Link
+                href={signupLink}
+                className="inline-flex items-center px-8 py-4 rounded-2xl font-bold text-lg text-primary-foreground bg-primary hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5"
+              >
+                Join Your Community
+              </Link>
+            </div>
+          </div>
+
+          {/* Hero Image */}
+          <div className="lg:col-span-2 hidden lg:flex justify-end relative">
+             <div className="relative w-full max-w-md aspect-square rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/40 dark:border-white/10 ring-8 ring-primary/5 transition-transform hover:scale-[1.02] duration-500">
+               <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent z-10 mix-blend-overlay" />
+               <Image 
+                  src="/hero.png" 
+                  alt="Modern Neighborhood Community" 
+                  fill 
+                  className="object-cover" 
+                  priority 
+               />
+             </div>
           </div>
         </div>
 

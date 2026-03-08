@@ -174,110 +174,33 @@ export default function ProviderDashboard() {
         const statsData = await statsRes.json();
         setStats(statsData.data);
       } else {
-        setStats(getMockStats());
+        setStats(null);
       }
 
       if (servicesRes.ok) {
         const servicesData = await servicesRes.json();
         setServices(servicesData.data || []);
       } else {
-        setServices(getMockServices());
+        setServices([]);
       }
 
       if (bookingsRes.ok) {
         const bookingsData = await bookingsRes.json();
         setBookings(bookingsData.data || []);
       } else {
-        setBookings(getMockBookings());
+        setBookings([]);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      setStats(getMockStats());
-      setServices(getMockServices());
-      setBookings(getMockBookings());
+      setStats(null);
+      setServices([]);
+      setBookings([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const getMockStats = () => ({
-    servicesCount: 2,
-    bookingStats: {
-      totalBookings: 45,
-      completedBookings: 38,
-      pendingBookings: 3,
-      confirmedBookings: 4,
-      totalRevenue: 28500,
-    },
-    reviewStats: {
-      totalReviews: 32,
-      avgRating: 4.7,
-    },
-    recentBookings: getMockBookings().slice(0, 5),
-  });
-
-  const getMockServices = () => [
-    {
-      _id: 's1',
-      title: 'Expert Electrician Service',
-      category: 'electrician',
-      description: 'Professional electrical repairs and installations.',
-      pricePerHour: 300,
-      rating: 4.8,
-      totalReviews: 45,
-      totalBookings: 128,
-      isActive: true,
-      isVerified: true,
-    },
-    {
-      _id: 's2',
-      title: 'Home Appliance Repair',
-      category: 'electrician',
-      description: 'Repair services for all home appliances.',
-      pricePerHour: 250,
-      rating: 4.5,
-      totalReviews: 23,
-      totalBookings: 56,
-      isActive: true,
-      isVerified: false,
-    },
-  ];
-
-  const getMockBookings = () => [
-    {
-      _id: 'b1',
-      service: { title: 'Expert Electrician Service', category: 'electrician' },
-      customer: { fullName: 'Amit Patel', phone: '+91 98765 43210', email: 'amit@example.com' },
-      scheduledDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-      scheduledTime: { start: '10:00', end: '12:00' },
-      customerAddress: { street: 'Block A, Sector 15', city: 'Noida', pincode: '201301' },
-      status: 'pending',
-      totalAmount: 600,
-      description: 'Need to fix the ceiling fan and some switch issues.',
-    },
-    {
-      _id: 'b2',
-      service: { title: 'Expert Electrician Service', category: 'electrician' },
-      customer: { fullName: 'Sneha Gupta', phone: '+91 87654 32109', email: 'sneha@example.com' },
-      scheduledDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-      scheduledTime: { start: '14:00', end: '16:00' },
-      customerAddress: { street: 'Block C, Sector 18', city: 'Noida', pincode: '201301' },
-      status: 'confirmed',
-      totalAmount: 600,
-      description: 'Complete wiring check for new flat.',
-    },
-    {
-      _id: 'b3',
-      service: { title: 'Home Appliance Repair', category: 'electrician' },
-      customer: { fullName: 'Rahul Verma', phone: '+91 76543 21098', email: 'rahul@example.com' },
-      scheduledDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      scheduledTime: { start: '11:00', end: '13:00' },
-      customerAddress: { street: 'Block B, Sector 12', city: 'Noida', pincode: '201301' },
-      status: 'completed',
-      totalAmount: 500,
-      description: 'Washing machine motor repair.',
-    },
-  ];
+// Removed getMockStats, getMockServices, getMockBookings
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('en-IN', {
@@ -314,17 +237,11 @@ export default function ProviderDashboard() {
       if (response.ok) {
         fetchDashboardData();
       } else {
-        // Demo update
-        setBookings(prev => prev.map(b => 
-          b._id === bookingId ? { ...b, status: newStatus } : b
-        ));
+        alert('Failed to update status');
       }
     } catch (error) {
       console.error('Error updating status:', error);
-      // Demo update
-      setBookings(prev => prev.map(b => 
-        b._id === bookingId ? { ...b, status: newStatus } : b
-      ));
+      alert('Error updating status');
     }
   };
 
@@ -340,16 +257,11 @@ export default function ProviderDashboard() {
       if (response.ok) {
         fetchDashboardData();
       } else {
-        // Demo toggle
-        setServices(prev => prev.map(s => 
-          s._id === serviceId ? { ...s, isActive: !s.isActive } : s
-        ));
+        alert('Failed to toggle service');
       }
     } catch (error) {
       console.error('Error toggling service:', error);
-      setServices(prev => prev.map(s => 
-        s._id === serviceId ? { ...s, isActive: !s.isActive } : s
-      ));
+      alert('Network error toggling service');
     }
   };
 
@@ -394,22 +306,11 @@ export default function ProviderDashboard() {
         });
         fetchDashboardData();
       } else {
-        // Demo add
-        const newMockService = {
-          _id: `s${Date.now()}`,
-          ...newService,
-          pricePerHour: Number(newService.pricePerHour),
-          rating: 0,
-          totalReviews: 0,
-          totalBookings: 0,
-          isActive: true,
-          isVerified: false,
-        };
-        setServices(prev => [newMockService, ...prev]);
-        setShowNewServiceModal(false);
+        alert('Failed to create service');
       }
     } catch (error) {
       console.error('Error creating service:', error);
+      alert('Network error creating service');
     } finally {
       setSubmitting(false);
     }

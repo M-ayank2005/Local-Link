@@ -57,12 +57,11 @@ export default function ProviderDetailPage() {
         const data = await response.json();
         setService(data.data);
       } else {
-        // Mock data for demo
-        setService(getMockService());
+        setService(null);
       }
     } catch (error) {
       console.error('Error fetching service:', error);
-      setService(getMockService());
+      setService(null);
     } finally {
       setLoading(false);
     }
@@ -78,95 +77,17 @@ export default function ProviderDetailPage() {
         const data = await response.json();
         setReviews(data.data || []);
       } else {
-        setReviews(getMockReviews());
+        setReviews([]);
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
-      setReviews(getMockReviews());
+      setReviews([]);
     } finally {
       setReviewsLoading(false);
     }
   };
 
-  const getMockService = () => ({
-    _id: params.id,
-    title: 'Expert Electrician Service',
-    category: 'electrician',
-    description: 'Professional electrical repairs, wiring, and installations with 10+ years experience. I specialize in residential electrical work including fan installation, wiring repairs, switchboard work, and complete home electrical solutions. Available for emergency services as well.',
-    pricePerHour: 300,
-    pricePerVisit: 150,
-    rating: 4.8,
-    totalReviews: 45,
-    totalBookings: 128,
-    experience: 10,
-    isVerified: true,
-    isActive: true,
-    skills: ['Wiring', 'Repairs', 'Installation', 'Maintenance', 'Emergency Services'],
-    languages: ['Hindi', 'English'],
-    serviceRadius: 10,
-    availability: {
-      monday: { isAvailable: true, slots: [{ start: '09:00', end: '18:00' }] },
-      tuesday: { isAvailable: true, slots: [{ start: '09:00', end: '18:00' }] },
-      wednesday: { isAvailable: true, slots: [{ start: '09:00', end: '18:00' }] },
-      thursday: { isAvailable: true, slots: [{ start: '09:00', end: '18:00' }] },
-      friday: { isAvailable: true, slots: [{ start: '09:00', end: '18:00' }] },
-      saturday: { isAvailable: true, slots: [{ start: '10:00', end: '16:00' }] },
-      sunday: { isAvailable: false, slots: [] },
-    },
-    address: {
-      street: 'Block A, Sector 15',
-      city: 'Noida',
-      state: 'UP',
-      pincode: '201301',
-    },
-    provider: {
-      _id: 'p1',
-      fullName: 'Rajesh Kumar',
-      email: 'rajesh.kumar@example.com',
-      phone: '+91 98765 43210',
-      profileImage: '',
-      rating: 4.8,
-      totalReviews: 45,
-      isVerified: true,
-      createdAt: '2023-01-15',
-    },
-  });
-
-  const getMockReviews = () => [
-    {
-      _id: 'r1',
-      rating: 5,
-      title: 'Excellent service!',
-      comment: 'Very professional and completed the work quickly. Fixed all electrical issues in my house. Highly recommended!',
-      reviewer: { fullName: 'Amit Patel', profileImage: '' },
-      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      helpfulCount: 12,
-      response: null,
-    },
-    {
-      _id: 'r2',
-      rating: 4,
-      title: 'Good work',
-      comment: 'Did a great job with the wiring. Arrived on time and was very courteous. Pricing was fair.',
-      reviewer: { fullName: 'Sneha Gupta', profileImage: '' },
-      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      helpfulCount: 8,
-      response: {
-        text: 'Thank you for your kind review! Looking forward to serving you again.',
-        respondedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-    },
-    {
-      _id: 'r3',
-      rating: 5,
-      title: 'Emergency service was fantastic',
-      comment: 'Called late evening for an emergency and he came within 30 minutes. Fixed the issue professionally. True professional!',
-      reviewer: { fullName: 'Rahul Verma', profileImage: '' },
-      createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-      helpfulCount: 15,
-      response: null,
-    },
-  ];
+// Removed getMockService and getMockReviews
 
   const handleBooking = () => {
     if (!isLoggedIn) {

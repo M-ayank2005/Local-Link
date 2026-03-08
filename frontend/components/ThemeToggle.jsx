@@ -2,7 +2,7 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -81,23 +81,24 @@ export function ThemeToggle() {
         </Link>
       ) : null}
       {showAccountButtons ? (
-        <>
+        <div className="flex items-center gap-2 mr-2 border-r border-gray-200 dark:border-gray-800 pr-4">
           <Link
             href="/profile"
-            className="px-3 py-1.5 rounded-md border text-sm font-semibold hover:bg-muted transition-colors"
-            title="Profile"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all shadow-sm"
+            title={userName ? `Profile (${userName})` : "Profile"}
           >
-            {userName}
+            <User className="w-5 h-5" />
           </Link>
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="px-3 py-1.5 rounded-md border text-sm hover:bg-muted transition-colors disabled:opacity-70"
+            className="w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+            title="Logout"
             aria-label="Logout"
           >
-            {isLoggingOut ? "Logging out..." : "Logout"}
+            <LogOut className="w-4 h-4" />
           </button>
-        </>
+        </div>
       ) : null}
       <button
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}

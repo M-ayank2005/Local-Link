@@ -38,7 +38,7 @@ export default function ResourcesPage() {
     setError('');
     try {
       const { lng, lat } = coords;
-      const params = new URLSearchParams({ lng, lat, distance: 10 });
+      const params = new URLSearchParams({ lng, lat, distance: 10000 });
       if (category) params.append('category', category);
 
       const token = localStorage.getItem('authToken');
@@ -52,13 +52,7 @@ export default function ResourcesPage() {
       setMlRanked(data.ml_ranked || false);
     } catch (err) {
       setError(err.message);
-      // Fallback mock data so the page is never blank during development
-      setResources([
-        { _id: 'm1', title: 'Bosch Drill Machine', category: 'drill', condition: 'good', pricePerDay: 80, depositAmount: 600, owner: { fullName: 'Rajan Mehta', rating: 4.7 }, ml_score: null },
-        { _id: 'm2', title: '8ft Aluminum Ladder', category: 'ladder', condition: 'good', pricePerDay: 50, depositAmount: 300, owner: { fullName: 'Sunita Rao', rating: 4.5 }, ml_score: null },
-        { _id: 'm3', title: 'Epson Projector 3000 Lumens', category: 'projector', condition: 'new', pricePerDay: 200, depositAmount: 2000, owner: { fullName: 'Amit Shah', rating: 4.9 }, ml_score: null },
-        { _id: 'm4', title: 'Large Camping Tent (6-person)', category: 'tent', condition: 'good', pricePerDay: 150, depositAmount: 800, owner: { fullName: 'Priya Kapoor', rating: 4.6 }, ml_score: null },
-      ]);
+      setResources([]);
     } finally {
       setIsLoading(false);
     }
@@ -105,9 +99,12 @@ export default function ResourcesPage() {
   );
 
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-8">
-      {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="min-h-screen bg-transparent text-foreground transition-colors duration-300 relative">
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-amber-400/20 dark:bg-amber-600/20 blur-[120px] pointer-events-none -z-10 animate-pulse" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-orange-400/20 dark:bg-orange-600/10 blur-[100px] pointer-events-none -z-10 animate-pulse delay-1000" />
+      <div className="container mx-auto p-4 md:p-8 space-y-8 relative z-10 w-full animate-in fade-in duration-500">
+        {/* Header */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Wrench className="w-7 h-7 text-amber-500" />
@@ -188,7 +185,7 @@ export default function ResourcesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((resource) => (
             <Link key={resource._id} href={`/resources/item/${resource._id}`}>
-              <div className="group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition-all hover:shadow-md hover:border-amber-500/50 cursor-pointer">
+              <div className="group relative overflow-hidden rounded-3xl border border-gray-200/50 dark:border-gray-800/50 bg-white/60 dark:bg-card/60 backdrop-blur-md p-6 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 hover:border-amber-500/50 cursor-pointer">
                 {/* Category badge */}
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-medium text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-full">
@@ -232,6 +229,7 @@ export default function ResourcesPage() {
         <Link href="/resources/my-items" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           View my listings & bookings →
         </Link>
+      </div>
       </div>
     </div>
   );

@@ -10,26 +10,65 @@ export default function ShopkeeperDashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Mocking API fetch
-    setTimeout(() => {
-      setInventory([
-        { _id: '1', name: 'Apples', stock: 50, price: 120, category: 'Fruits' },
-        { _id: '2', name: 'Milk', stock: 12, price: 65, category: 'Dairy' },
-        { _id: '3', name: 'Bread', stock: 0, price: 40, category: 'Bakery' },
-      ]);
-      setOrders([
-        { _id: '101', customer: 'John Doe', items: 3, total: 245, status: 'pending', time: '10 mins ago' },
-        { _id: '102', customer: 'Jane Smith', items: 1, total: 65, status: 'processing', time: '1 hr ago' },
-        { _id: '103', customer: 'Mike Johnson', items: 5, total: 890, status: 'delivered', time: 'Yesterday' },
-      ]);
-      setIsLoading(false);
-    }, 800);
+    const fetchData = async () => {
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+        const token = localStorage.getItem('authToken');
+        const headers = { ...(token && { Authorization: `Bearer ${token}` }) };
+
+        const [invRes, ordRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/v1/commerce/shopkeeper/inventory`, { headers }),
+          fetch(`${API_BASE_URL}/v1/commerce/shopkeeper/orders`, { headers })
+        ]);
+
+        if (invRes.ok && ordRes.ok) {
+          const invJson = await invRes.json();
+          const ordJson = await ordRes.json();
+          
+          setInventory(Array.isArray(invJson.data) ? invJson.data : Array.isArray(invJson) ? invJson : []);
+          
+          const ordersData = Array.isArray(ordJson.data) ? ordJson.data : Array.isArray(ordJson) ? ordJson : [];
+          setOrders(ordersData.map(o => ({
+            _id: o._id,
+            customer: o.user?.fullName || o.customer || 'Guest',
+            items: o.items?.length || 0,
+            total: o.totalAmount || o.total || 0,
+            status: o.status || 'pending',
+            time: new Date(o.createdAt || Date.now()).toLocaleDateString()
+          })));
+        } else {
+          console.error("Failed to fetch shopkeeper data");
+        }
+      } catch (err) {
+        console.error("Network error fetching shopkeeper data", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  const updateOrderStatus = (id, newStatus) => {
-    setOrders(orders.map(order => 
-      order._id === id ? { ...order, status: newStatus } : order
-    ));
+  const updateOrderStatus = async (id, newStatus) => {
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${API_BASE_URL}/v1/commerce/shopkeeper/orders/${id}/status`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        setOrders(orders.map(order => order._id === id ? { ...order, status: newStatus } : order));
+      } else {
+        alert("Failed to update status");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network err");
+    }
   };
 
   const [showProductModal, setShowProductModal] = useState(false);
@@ -59,18 +98,44 @@ export default function ShopkeeperDashboard() {
     setShowProductModal(true);
   };
 
-  const handleSaveProduct = (e) => {
+  const handleSaveProduct = async (e) => {
     e.preventDefault();
     if (editingProduct) {
+      // Not typically supported by current backend routes, but simulate locally to prevent UI break
       setInventory(inventory.map(p => p._id === editingProduct._id ? { ...p, ...productForm } : p));
+      setShowProductModal(false);
     } else {
-      setInventory([{ _id: Date.now().toString(), ...productForm }, ...inventory]);
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(`${API_BASE_URL}/v1/commerce/shopkeeper/inventory`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` })
+          },
+          body: JSON.stringify(productForm)
+        });
+        if (res.ok) {
+          const json = await res.json();
+          const newProduct = json.data || { _id: Date.now().toString(), ...productForm };
+          setInventory([newProduct, ...inventory]);
+          setShowProductModal(false);
+        } else {
+          alert('Failed to add product');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Err adding product');
+      }
     }
-    setShowProductModal(false);
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8 max-w-6xl animate-in fade-in duration-500 relative">
+    <div className="min-h-screen bg-transparent text-foreground transition-colors duration-300 relative overflow-hidden">
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/20 dark:bg-blue-600/20 blur-[120px] pointer-events-none -z-10 animate-pulse" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-indigo-400/20 dark:bg-indigo-600/10 blur-[100px] pointer-events-none -z-10 animate-pulse delay-1000" />
+      <div className="container mx-auto p-4 md:p-8 space-y-8 relative z-10 w-full animate-in fade-in duration-500">
       {/* Product Modal overlay */}
       {showProductModal && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -272,6 +337,7 @@ export default function ShopkeeperDashboard() {
           ))}
         </section>
       )}
+      </div>
     </div>
   );
 }

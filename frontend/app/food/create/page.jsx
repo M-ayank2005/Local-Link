@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Leaf, ArrowLeft, Send } from 'lucide-react';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+
 export default function CreateFoodListing() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -52,7 +54,7 @@ export default function CreateFoodListing() {
       const token = localStorage.getItem('authToken'); 
       if (!token) return router.push('/');
 
-      const response = await fetch('http://localhost:5000/api/food', {
+      const response = await fetch(`${API_BASE_URL}/food`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -29,21 +29,7 @@ export default function ResourceDetailPage() {
         setResource(data.data);
       } catch (err) {
         setError(err.message);
-        // Development fallback
-        setResource({
-          _id: id,
-          title: 'Epson Projector 3000 Lumens',
-          description: 'Perfect for presentations, movie nights, and events. Comes with HDMI cable and remote.',
-          category: 'projector',
-          condition: 'new',
-          pricePerDay: 200,
-          depositAmount: 2000,
-          images: [],
-          rules: 'Return by 10am on due date. No outdoor use without prior approval.',
-          owner: { _id: 'o1', fullName: 'Amit Shah', rating: 4.9, totalReviews: 23 },
-          bookedDates: [{ from: '2026-03-20', to: '2026-03-22' }],
-          ml_demand_forecast: { predicted_bookings_next_7_days: 4, confidence: 0.78, source: 'unavailable' },
-        });
+        setResource(null);
       } finally {
         setIsLoading(false);
       }

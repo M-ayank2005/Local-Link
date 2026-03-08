@@ -8,32 +8,66 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Mocking API fetch for admin shops
-    setTimeout(() => {
-      setShops([
-        { _id: '1', name: 'Fresh Veggies Mart', owner: 'Ramesh Gupta', status: 'pending', submittedAt: '2 days ago' },
-        { _id: '2', name: 'Daily Needs Superstore', owner: 'Anita Singh', status: 'verified', submittedAt: '1 week ago' },
-        { _id: '3', name: 'Sunrise Bakery', owner: 'John Paul', status: 'pending', submittedAt: '5 hours ago' },
-        { _id: '4', name: 'Green Medicos', owner: 'Dr. Sharma', status: 'rejected', submittedAt: '2 weeks ago' },
-      ]);
-      setIsLoading(false);
-    }, 600);
+    const fetchShops = async () => {
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(`${API_BASE_URL}/v1/admin/shops`, {
+          headers: { ...(token && { Authorization: `Bearer ${token}` }) }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          const items = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];
+          setShops(items.map(s => ({
+            _id: s._id,
+            name: s.name,
+            owner: s.owner?.fullName || s.owner || 'Unknown',
+            status: s.status || 'pending',
+            submittedAt: new Date(s.createdAt || Date.now()).toLocaleDateString()
+          })));
+        } else {
+          console.error("Failed to fetch admin shops");
+        }
+      } catch (err) {
+        console.error("Network error fetching admin shops", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchShops();
   }, []);
 
-  const handleVerify = (id) => {
-    setShops(shops.map(shop => 
-      shop._id === id ? { ...shop, status: 'verified' } : shop
-    ));
+  const updateStatus = async (id, status) => {
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${API_BASE_URL}/v1/admin/shops/${id}/verify`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        setShops(shops.map(shop => shop._id === id ? { ...shop, status } : shop));
+      } else {
+        alert("Failed to update status");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error updating status");
+    }
   };
 
-  const handleReject = (id) => {
-    setShops(shops.map(shop => 
-      shop._id === id ? { ...shop, status: 'rejected' } : shop
-    ));
-  };
+  const handleVerify = (id) => updateStatus(id, 'verified');
+  const handleReject = (id) => updateStatus(id, 'rejected');
 
   return (
-    <div className="container mx-auto p-4 md:p-8 max-w-6xl animate-in fade-in duration-500">
+    <div className="min-h-screen bg-transparent text-foreground transition-colors duration-300 relative overflow-hidden">
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-400/20 dark:bg-emerald-600/20 blur-[120px] pointer-events-none -z-10 animate-pulse" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-teal-400/20 dark:bg-teal-600/10 blur-[100px] pointer-events-none -z-10 animate-pulse delay-1000" />
+      <div className="container mx-auto p-4 md:p-8 space-y-8 relative z-10 w-full animate-in fade-in duration-500">
       <header className="mb-8 pb-6 border-b flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-primary flex items-center">
@@ -121,6 +155,7 @@ export default function AdminPage() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

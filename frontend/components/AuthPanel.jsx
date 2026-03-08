@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import {
   Eye,
   EyeOff,
   MapPin,
   RefreshCw,
+  Store,
 } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
@@ -174,127 +176,156 @@ export function AuthPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-emerald-50 dark:from-background dark:via-background dark:to-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen bg-transparent text-foreground transition-colors duration-300 relative overflow-hidden">
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/20 dark:bg-primary/20 blur-[120px] pointer-events-none -z-10 animate-pulse" />
       <div className="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-purple-400/20 dark:bg-violet-500/10 blur-[100px] pointer-events-none -z-10 animate-pulse delay-1000" />
 
-      <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl inset-0 z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center mb-24">
-          <div className="lg:col-span-3 space-y-6">
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm tracking-wide mb-2">
-              Secure Account Access
-            </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
-              Welcome to <span className="bg-gray-900/40 bg-clip-text text-transparent">Local Link</span>
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl">
-              Connect to your hyper-local community. One unified account granting you access across neighborhood services.
-            </p>
-          </div>
-
-          <div className="lg:col-span-2">
-            <div className="bg-white/70 dark:bg-card text-card-foreground border rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden group backdrop-blur-md">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none origin-bottom group-hover:scale-110 transition-transform duration-700" />
-
-              <div className="flex bg-muted p-1 rounded-2xl mb-8 relative z-10">
-                <button
-                  onClick={() => switchMode('login')}
-                  className={`flex-1 py-2.5 px-4 text-sm font-bold rounded-xl transition-all duration-300 ${mode === 'login' ? 'bg-background shadow-md text-primary' : 'text-muted-foreground hover:bg-background/50'}`}
-                >
-                  Log in
-                </button>
-                <button
-                  onClick={() => switchMode('signup')}
-                  className={`flex-1 py-2.5 px-4 text-sm font-bold rounded-xl transition-all duration-300 ${mode === 'signup' ? 'bg-background shadow-md text-primary' : 'text-muted-foreground hover:bg-background/50'}`}
-                >
-                  Sign up
-                </button>
+      <div className="container mx-auto px-4 py-8 md:py-16 max-w-6xl relative z-10 flex items-center justify-center min-h-screen">
+        <div className="w-full bg-white/70 dark:bg-card/80 text-card-foreground border rounded-[2.5rem] shadow-2xl relative overflow-hidden backdrop-blur-xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            
+            {/* Left Column: Image Splash (Hidden on mobile) */}
+            <div className="hidden lg:block relative p-4 bg-primary/5">
+              <div className="relative w-full h-full min-h-[600px] rounded-[2rem] overflow-hidden shadow-inner isolate">
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent z-10 mix-blend-overlay" />
+                <Image
+                   src="/auth-splash.png"
+                   alt="Modern Local Ecosystem"
+                   fill
+                   className="object-cover transition-transform hover:scale-105 duration-[20s] ease-out"
+                   priority
+                />
+                
+                <div className="absolute bottom-10 left-10 right-10 z-20 text-white">
+                   <div className="flex items-center gap-2 mb-4 bg-white/20 backdrop-blur-md w-max px-4 py-2 rounded-full border border-white/30 text-white shadow-lg">
+                      <Store className="w-5 h-5" />
+                      <span className="font-bold text-sm tracking-wide">Local Links Platform</span>
+                   </div>
+                   <h2 className="text-3xl font-bold leading-tight drop-shadow-md">
+                     Empowering<br/>Your Neighborhood.
+                   </h2>
+                   <p className="mt-2 text-white/90 text-sm font-medium drop-shadow-sm max-w-sm">
+                     Join thousands of residents, shopkeepers, and local heroes building a stronger, safer, and smarter community together.
+                   </p>
+                </div>
               </div>
+            </div>
 
-              <div className="relative z-10">
-                <h2 className="text-2xl font-bold mb-2">
-                  {mode === 'login' ? 'Sign in to continue' : 'Create an account'}
-                </h2>
-                <p className="text-sm text-muted-foreground mb-6">
-                  {mode === 'login' ? 'Welcome back! Please enter your details.' : 'Join the Local Link community today.'}
-                </p>
+            {/* Right Column: Auth Form Container */}
+            <div className="flex flex-col justify-center p-8 sm:p-12 lg:p-16 relative">
+              
+              <div className="max-w-md w-full mx-auto">
+                <div className="lg:hidden flex items-center gap-2 mb-8 bg-primary/10 w-max px-3 py-1.5 rounded-full text-primary shadow-sm border border-primary/20">
+                    <Store className="w-4 h-4" />
+                    <span className="font-bold text-xs uppercase tracking-wider">Local Links</span>
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {mode === 'signup' && (
-                    <>
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium">Full Name</label>
-                        <input type="text" name="fullName" required value={signupData.fullName} onChange={handleSignupChange} className="w-full p-3 rounded-xl border bg-background text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-muted-foreground/60" placeholder="Your full name" />
-                      </div>
+                <div className="flex bg-muted/80 p-1 rounded-2xl mb-8 relative z-10 border border-gray-200/50 dark:border-gray-800/50">
+                  <button
+                    onClick={() => switchMode('login')}
+                    className={`flex-1 py-2.5 px-4 text-sm font-bold rounded-xl transition-all duration-300 ${mode === 'login' ? 'bg-background shadow-md text-primary' : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'}`}
+                  >
+                    Log in
+                  </button>
+                  <button
+                    onClick={() => switchMode('signup')}
+                    className={`flex-1 py-2.5 px-4 text-sm font-bold rounded-xl transition-all duration-300 ${mode === 'signup' ? 'bg-background shadow-md text-primary' : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'}`}
+                  >
+                    Sign up
+                  </button>
+                </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                <div className="relative z-10">
+                  <h2 className="text-3xl font-extrabold mb-2 tracking-tight text-gray-900 dark:text-white">
+                    {mode === 'login' ? 'Welcome back' : 'Create an account'}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-8">
+                    {mode === 'login' ? 'Securely login to access your local services.' : 'Join the modern ecosystem today.'}
+                  </p>
+
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    {mode === 'signup' && (
+                      <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4">
                         <div className="space-y-1.5">
-                          <label className="text-sm font-medium">Email</label>
-                          <input type="email" name="email" required value={signupData.email} onChange={handleSignupChange} className="w-full p-3 rounded-xl border bg-background text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-muted-foreground/60" placeholder="you@email.com" />
+                          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Full Name</label>
+                          <input type="text" name="fullName" required value={signupData.fullName} onChange={handleSignupChange} className="w-full p-3.5 rounded-2xl border bg-white dark:bg-gray-900 border-gray-200/80 dark:border-gray-800 shadow-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-muted-foreground/50" placeholder="John Doe" />
                         </div>
-                        <div className="space-y-1.5">
-                          <label className="text-sm font-medium">Phone</label>
-                          <input type="tel" name="phone" required value={signupData.phone} onChange={handleSignupChange} className="w-full p-3 rounded-xl border bg-background text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-muted-foreground/60" placeholder="+91 9876543210" />
-                        </div>
-                      </div>
 
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium">Account Type</label>
-                        <select name="role" value={signupData.role} onChange={handleSignupChange} className="w-full p-3 rounded-xl border bg-background text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all">
-                          <option value="resident">Resident / Customer</option>
-                          <option value="shopkeeper">Shopkeeper / Merchant</option>
-                          <option value="ngo">NGO Representative</option>
-                          <option value="service_provider">Service Provider</option>
-                          <option value="admin">Platform Admin</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium">Location Setting</label>
-                        {locationCoords ? (
-                          <div className="p-3 border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-between text-sm">
-                            <div className="flex items-center"><MapPin className="w-4 h-4 mr-2" /> Got Location</div>
-                            <span className="font-mono text-xs opacity-75">{locationCoords[1].toFixed(4)}, {locationCoords[0].toFixed(4)}</span>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Email</label>
+                            <input type="email" name="email" required value={signupData.email} onChange={handleSignupChange} className="w-full p-3.5 rounded-2xl border bg-white dark:bg-gray-900 border-gray-200/80 dark:border-gray-800 shadow-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-muted-foreground/50" placeholder="you@email.com" />
                           </div>
-                        ) : (
-                          <button type="button" onClick={getUserLocation} disabled={isLocating} className="w-full p-3 flex justify-center items-center rounded-xl border border-primary text-primary hover:bg-primary/5 transition-colors text-sm font-medium">
-                            {isLocating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <MapPin className="w-4 h-4 mr-2" />}
-                            {isLocating ? 'Detecting...' : 'Auto-detect coordinates'}
-                          </button>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Phone</label>
+                            <input type="tel" name="phone" required value={signupData.phone} onChange={handleSignupChange} className="w-full p-3.5 rounded-2xl border bg-white dark:bg-gray-900 border-gray-200/80 dark:border-gray-800 shadow-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-muted-foreground/50" placeholder="+91 9876543210" />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Account Type</label>
+                          <select name="role" value={signupData.role} onChange={handleSignupChange} className="w-full p-3.5 rounded-2xl border bg-white dark:bg-gray-900 border-gray-200/80 dark:border-gray-800 shadow-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all appearance-none cursor-pointer">
+                            <option value="resident">Resident / Customer</option>
+                            <option value="shopkeeper">Shopkeeper / Merchant</option>
+                            <option value="ngo">NGO Representative</option>
+                            <option value="service_provider">Service Provider</option>
+                            <option value="admin">Platform Admin</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Location Status</label>
+                          {locationCoords ? (
+                            <div className="p-3.5 border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-between text-sm shadow-sm transition-all duration-300">
+                              <div className="flex items-center font-semibold"><MapPin className="w-4 h-4 mr-2" /> Coordinates Secured</div>
+                              <span className="font-mono text-xs opacity-75">{locationCoords[1].toFixed(4)}, {locationCoords[0].toFixed(4)}</span>
+                            </div>
+                          ) : (
+                            <button type="button" onClick={getUserLocation} disabled={isLocating} className="w-full p-3.5 flex justify-center items-center rounded-2xl border-2 border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:border-primary transition-all text-sm font-bold">
+                              {isLocating ? <RefreshCw className="w-5 h-5 mr-3 animate-spin" /> : <MapPin className="w-5 h-5 mr-3" />}
+                              {isLocating ? 'Acquiring GPS...' : 'Auto-Detect My Location'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {mode === 'login' && (
+                      <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Email address</label>
+                        <input type="email" name="email" required value={loginData.email} onChange={handleLoginChange} className="w-full p-3.5 rounded-2xl border bg-white dark:bg-gray-900 border-gray-200/80 dark:border-gray-800 shadow-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-muted-foreground/50" placeholder="you@email.com" />
+                      </div>
+                    )}
+
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex justify-between items-center px-1">
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Password</label>
+                        {mode === 'login' && (
+                           <a href="#" className="text-xs font-bold text-primary hover:text-primary/80 transition-colors">Forgot password?</a>
                         )}
                       </div>
-                    </>
-                  )}
-
-                  {mode === 'login' && (
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium">Email address</label>
-                      <input type="email" name="email" required value={loginData.email} onChange={handleLoginChange} className="w-full p-3 rounded-xl border bg-background text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-muted-foreground/60" placeholder="you@email.com" />
+                      <div className="relative">
+                        <input type={showPassword ? 'text' : 'password'} name="password" required minLength={6} value={mode === 'login' ? loginData.password : signupData.password} onChange={mode === 'login' ? handleLoginChange : handleSignupChange} className="w-full p-3.5 rounded-2xl border bg-white dark:bg-gray-900 border-gray-200/80 dark:border-gray-800 shadow-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-muted-foreground/50 pr-12" placeholder="••••••••" />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors p-1">
+                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
                     </div>
-                  )}
 
-                  <div className="space-y-1.5 pt-1">
-                    <label className="text-sm font-medium">Password</label>
-                    <div className="relative">
-                      <input type={showPassword ? 'text' : 'password'} name="password" required minLength={6} value={mode === 'login' ? loginData.password : signupData.password} onChange={mode === 'login' ? handleLoginChange : handleSignupChange} className="w-full p-3 rounded-xl border bg-background text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-muted-foreground/60 pr-12" placeholder="••••••••" />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1">
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
+                    {errorMessage && (
+                      <div className="p-3.5 text-sm font-semibold bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-2xl flex items-center animate-in shake duration-300">
+                        {errorMessage}
+                      </div>
+                    )}
 
-                  {errorMessage && (
-                    <div className="p-3 mt-4 text-sm font-medium bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-lg flex items-center">
-                      {errorMessage}
-                    </div>
-                  )}
-
-                  <button type="submit" disabled={isLoading} className="w-full p-3.5 mt-4 rounded-xl font-bold text-primary-foreground bg-primary hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:-translate-y-0 disabled:hover:shadow-none transition-all flex justify-center items-center">
-                    {isLoading && <RefreshCw className="w-4 h-4 mr-2 animate-spin" />}
-                    {mode === 'login' ? 'Sign In Now' : 'Create Account'}
-                  </button>
-                </form>
+                    <button type="submit" disabled={isLoading} className="w-full p-4 mt-8 rounded-2xl font-bold text-lg tracking-wide text-primary-foreground bg-primary hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:-translate-y-0 disabled:hover:shadow-none transition-all flex justify-center items-center">
+                      {isLoading ? <RefreshCw className="w-5 h-5 mr-3 animate-spin" /> : null}
+                      {mode === 'login' ? 'Sign In Now' : 'Create Account'}
+                    </button>
+                  </form>
+                </div>
               </div>
+              
             </div>
           </div>
         </div>

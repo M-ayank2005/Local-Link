@@ -39,15 +39,45 @@ export default function RegisterShopPage() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Mock backend API call: POST /api/admin/shops
-    setTimeout(() => {
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${API_BASE_URL}/admin/shops`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          address: formData.address,
+          description: formData.description,
+          location: {
+            type: "Point",
+            coordinates: [
+              parseFloat(formData.longitude) || 0,
+              parseFloat(formData.latitude) || 0
+            ]
+          }
+        })
+      });
+
+      if (response.ok) {
+        setIsSuccess(true);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || "Failed to register shop.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network err. Cannot register shop.");
+    } finally {
       setIsSubmitting(false);
-      setIsSuccess(true);
-    }, 1500);
+    }
   };
 
   if (isSuccess) {

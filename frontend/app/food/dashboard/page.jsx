@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, AlertCircle, ShoppingBag, Truck, Calendar, Phone, User } from 'lucide-react';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+
 export default function FoodDashboard() {
   const [activeTab, setActiveTab] = useState('listings'); // 'listings' or 'claims'
   const [myListings, setMyListings] = useState([]);
@@ -30,7 +32,7 @@ export default function FoodDashboard() {
 
   const fetchMyListings = async (token) => {
     try {
-      const response = await fetch('http://localhost:5000/api/food/my-posts', {
+      const response = await fetch(`${API_BASE_URL}/food/my-posts`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const result = await response.json();
@@ -42,7 +44,7 @@ export default function FoodDashboard() {
 
   const fetchIncomingOrders = async (token) => {
     try {
-      const response = await fetch('http://localhost:5000/api/food/my-incoming-orders', {
+      const response = await fetch(`${API_BASE_URL}/food/my-incoming-orders`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const result = await response.json();
@@ -55,7 +57,7 @@ export default function FoodDashboard() {
   const fetchMyClaims = async (token) => {
     try {
       // Logic changed: Now fetches FoodOrders, not FoodListings
-      const response = await fetch('http://localhost:5000/api/food/my-claims', {
+      const response = await fetch(`${API_BASE_URL}/food/my-claims`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const result = await response.json();
@@ -70,7 +72,7 @@ export default function FoodDashboard() {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/food/order/${orderId}/pickup`, {
+      const response = await fetch(`${API_BASE_URL}/food/order/${orderId}/pickup`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });

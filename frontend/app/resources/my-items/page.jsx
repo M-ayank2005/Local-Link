@@ -71,9 +71,7 @@ export default function MyItemsPage() {
       if (!res.ok) throw new Error(data.error);
       setItems(data.data || []);
     } catch {
-      setItems([
-        { _id: 'mi1', title: 'Bosch Drill', category: 'drill', condition: 'good', pricePerDay: 80, depositAmount: 600, isActive: true, activeBookings: 1 },
-      ]);
+      setItems([]);
     } finally {
       setIsLoading(false);
     }

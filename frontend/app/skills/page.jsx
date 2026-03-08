@@ -137,14 +137,13 @@ export default function SkillsPage() {
         setTotalPages(data.totalPages || 1);
         setTotal(data.total || 0);
       } else {
-        // Use mock data for demo if API not available
-        setServices(getMockServices());
-        setTotal(getMockServices().length);
+        setServices([]);
+        setTotal(0);
       }
     } catch (error) {
       console.error('Error fetching services:', error);
-      setServices(getMockServices());
-      setTotal(getMockServices().length);
+      setServices([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -156,147 +155,58 @@ export default function SkillsPage() {
     fetchServices();
   };
 
-  const getMockServices = () => [
-    {
-      _id: '1',
-      title: 'Expert Electrician Service',
-      category: 'electrician',
-      description: 'Professional electrical repairs, wiring, and installations with 10+ years experience.',
-      pricePerHour: 300,
-      rating: 4.8,
-      totalReviews: 45,
-      experience: 10,
-      isVerified: true,
-      provider: { fullName: 'Rajesh Kumar', profileImage: '', isVerified: true },
-      distance: 1.2,
-    },
-    {
-      _id: '2',
-      title: 'Home Tutor - Math & Science',
-      category: 'tutor',
-      description: 'Experienced tutor for classes 6-12. Board exam preparation specialist.',
-      pricePerHour: 500,
-      rating: 4.9,
-      totalReviews: 72,
-      experience: 8,
-      isVerified: true,
-      provider: { fullName: 'Priya Sharma', profileImage: '', isVerified: true },
-      distance: 0.8,
-    },
-    {
-      _id: '3',
-      title: 'Professional Plumbing Service',
-      category: 'plumber',
-      description: 'All plumbing solutions - leak repairs, pipe fitting, bathroom installations.',
-      pricePerHour: 250,
-      rating: 4.6,
-      totalReviews: 38,
-      experience: 6,
-      isVerified: false,
-      provider: { fullName: 'Mohan Singh', profileImage: '', isVerified: false },
-      distance: 2.1,
-    },
-    {
-      _id: '4',
-      title: 'House Cleaning Service',
-      category: 'cleaner',
-      description: 'Deep cleaning, regular cleaning, and move-in/move-out cleaning services.',
-      pricePerHour: 200,
-      rating: 4.7,
-      totalReviews: 56,
-      experience: 4,
-      isVerified: true,
-      provider: { fullName: 'Sunita Devi', profileImage: '', isVerified: true },
-      distance: 1.5,
-    },
-    {
-      _id: '5',
-      title: 'Carpentry & Woodwork',
-      category: 'carpenter',
-      description: 'Custom furniture, repairs, and all types of wooden work.',
-      pricePerHour: 350,
-      rating: 4.5,
-      totalReviews: 29,
-      experience: 12,
-      isVerified: true,
-      provider: { fullName: 'Ramesh Verma', profileImage: '', isVerified: true },
-      distance: 3.0,
-    },
-    {
-      _id: '6',
-      title: 'Home Cook Service',
-      category: 'cook',
-      description: 'Daily cooking service for families. North & South Indian cuisine.',
-      pricePerHour: 300,
-      rating: 4.8,
-      totalReviews: 41,
-      experience: 7,
-      isVerified: true,
-      provider: { fullName: 'Lakshmi Iyer', profileImage: '', isVerified: true },
-      distance: 1.8,
-    },
-  ];
+// Removed getMockServices()
 
   const getCategoryIcon = (cat) => {
     return CATEGORIES.find(c => c.value === cat)?.icon || '📋';
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-100/70 via-blue-50 to-purple-100/60 dark:from-background dark:via-background dark:to-background">
-      {/* Navigation Bar */}
-      <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex justify-between items-center sticky top-0 z-20 transition-colors duration-300">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition">
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="bg-violet-100 dark:bg-violet-900/30 p-1.5 rounded-lg">
-              <Briefcase className="text-violet-600 dark:text-violet-400 w-6 h-6" />
+    <div className="min-h-screen bg-transparent text-foreground transition-colors duration-300 relative">
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-violet-400/20 dark:bg-violet-600/20 blur-[120px] pointer-events-none -z-10 animate-pulse" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-fuchsia-400/20 dark:bg-fuchsia-600/10 blur-[100px] pointer-events-none -z-10 animate-pulse delay-1000" />
+      
+      <div className="container mx-auto p-4 md:p-8 space-y-8 relative z-10 w-full animate-in fade-in duration-500">
+        {/* Header Section */}
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white/60 dark:bg-card/60 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-gray-200/50 dark:border-gray-800/50 shadow-sm">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/15 text-violet-600 text-xs md:text-sm font-semibold mb-3">
+              <Briefcase className="w-4 h-4" /> Professional Network
             </div>
-            <h1 className="text-xl font-extrabold text-gray-800 dark:text-gray-100 hidden sm:block">
-              Skill Exchange
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight text-gray-900 dark:text-white">
+              Skill & Service <span className="text-violet-600 dark:text-violet-400">Exchange</span>
             </h1>
+            <p className="text-muted-foreground mt-3 max-w-2xl text-sm md:text-base">
+              Book verified electricians, plumbers, tutors, and more right from your neighborhood. Fast, reliable, and entirely transparent.
+            </p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-3">
-          {isLoggedIn && (
-            <>
-              <Link
-                href="/skills/bookings"
-                className="flex items-center gap-2 bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 font-medium py-2 px-4 rounded-lg transition shadow-sm"
-              >
-                <Clock className="w-5 h-5" />
-                <span className="hidden sm:inline">My Bookings</span>
-              </Link>
-              {isProvider && (
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0">
+            {isLoggedIn && (
+              <>
                 <Link
-                  href="/skills/dashboard"
-                  className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-medium py-2 px-4 rounded-lg transition shadow-sm"
+                  href="/skills/bookings"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold py-3 px-5 rounded-xl transition border border-gray-200/50 dark:border-gray-700/50 shadow-sm"
                 >
-                  <User className="w-5 h-5" />
-                  <span className="hidden sm:inline">Provider Dashboard</span>
+                  <Clock className="w-5 h-5" />
+                  <span>My Bookings</span>
                 </Link>
-              )}
-            </>
-          )}
-        </div>
-      </nav>
+                {isProvider && (
+                  <Link
+                    href="/skills/dashboard"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 px-5 rounded-xl transition shadow-sm hover:shadow-violet-500/25 hover:-translate-y-0.5"
+                  >
+                    <User className="w-5 h-5" />
+                    <span>Provider Dashboard</span>
+                  </Link>
+                )}
+              </>
+            )}
+          </div>
+        </header>
 
-      {/* Hero Banner */}
-      <div className="bg-violet-600 dark:bg-violet-900 text-white py-12 px-8 shadow-inner">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-black mb-4">Find Trusted Local Professionals</h2>
-          <p className="text-violet-100 dark:text-violet-200 text-lg max-w-2xl">
-            Book verified electricians, plumbers, tutors, and more from your neighborhood. Fast, reliable, and affordable.
-          </p>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="p-4 md:p-8 max-w-7xl mx-auto -mt-6 relative z-10">
         {/* Search & Filters */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-4 md:p-6 mb-6 border border-gray-100 dark:border-gray-800">
+        <div className="bg-white/70 dark:bg-card/60 backdrop-blur-xl rounded-2xl shadow-sm p-4 md:p-6 border border-gray-200/50 dark:border-gray-800/50 relative overflow-hidden">
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -402,7 +312,7 @@ export default function SkillsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service) => (
               <Link key={service._id} href={`/skills/provider/${service._id}`}>
-                <div className="group relative overflow-hidden rounded-2xl border bg-white dark:bg-gray-900 p-6 shadow-sm transition-all hover:shadow-lg hover:border-violet-400 dark:border-gray-800">
+                <div className="group relative overflow-hidden rounded-3xl border border-gray-200/50 dark:border-gray-800/50 bg-white/60 dark:bg-card/60 backdrop-blur-md p-6 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 hover:border-violet-400/50 dark:hover:border-violet-500/50">
                   <div className="absolute top-0 right-0 p-4 opacity-0 transition-opacity group-hover:opacity-100">
                     <ChevronRight className="w-5 h-5 text-violet-600" />
                   </div>

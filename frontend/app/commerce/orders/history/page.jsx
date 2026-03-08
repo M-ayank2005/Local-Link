@@ -4,58 +4,44 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Package, Clock, CheckCircle2, MapPin, ArrowLeft, ChevronRight, Store } from 'lucide-react';
 
-// Mocked user order data
-const MOCK_ORDERS = [
-  {
-    id: "ORD-9823-11AB",
-    shopName: "Fresh Veggies Mart",
-    date: "2026-03-02T10:30:00Z",
-    total: 350,
-    status: "delivered",
-    items: [
-      { name: "Organic Tomatoes", quantity: 2, price: 60 },
-      { name: "Onions", quantity: 3, price: 40 },
-    ],
-    deliveryType: "shop-staff"
-  },
-  {
-    id: "ORD-9844-42XC",
-    shopName: "Daily Needs Supermarket",
-    date: "2026-03-01T18:15:00Z",
-    total: 1250,
-    status: "processing",
-    items: [
-      { name: "Aashirvaad Atta 5kg", quantity: 1, price: 250 },
-      { name: "Tata Salt", quantity: 2, price: 25 },
-      { name: "Fortune Sunflower Oil 1L", quantity: 2, price: 160 }
-    ],
-    deliveryType: "local-partner"
-  },
-  {
-    id: "ORD-9712-88PP",
-    shopName: "Gupta General Store",
-    date: "2026-02-28T09:45:00Z",
-    total: 85,
-    status: "delivered",
-    items: [
-      { name: "Amul Milk 1L", quantity: 1, price: 65 },
-      { name: "Britannia Bread", quantity: 1, price: 20 }
-    ],
-    deliveryType: "pickup"
-  }
-];
+// Removed MOCK_ORDERS
 
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simulate API fetch
+  // Fetch real order history
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setOrders(MOCK_ORDERS);
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
+    const fetchOrders = async () => {
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(`${API_BASE_URL}/commerce/orders/my`, {
+          headers: { ...(token && { Authorization: `Bearer ${token}` }) }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          const data = json.data || json;
+          const mappedOrders = (Array.isArray(data) ? data : []).map(o => ({
+            id: o._id,
+            shopName: o.shop?.name || o.shopName || 'Unknown Shop',
+            date: o.createdAt || o.date || new Date().toISOString(),
+            total: o.totalAmount || o.total || 0,
+            status: o.status || 'pending',
+            items: o.items || [],
+            deliveryType: o.deliveryType || 'pickup'
+          }));
+          setOrders(mappedOrders);
+        } else {
+          console.error("Failed to fetch orders");
+        }
+      } catch (err) {
+        console.error("Network error fetching orders", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchOrders();
   }, []);
 
   const getStatusBadge = (status) => {

@@ -46,9 +46,11 @@ export default function EmergencyPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-100/70 via-blue-50 to-violet-100/60 dark:from-background dark:via-background dark:to-background">
-      <div className="container mx-auto px-4 py-8 md:py-12 max-w-7xl space-y-6">
-        <section className="rounded-3xl border bg-white/75 dark:bg-card p-6 md:p-8 shadow-xl backdrop-blur-md">
+    <div className="min-h-screen bg-transparent text-foreground transition-colors duration-300 relative">
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-rose-400/20 dark:bg-rose-600/20 blur-[120px] pointer-events-none -z-10 animate-pulse" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-red-400/20 dark:bg-red-600/10 blur-[100px] pointer-events-none -z-10 animate-pulse delay-1000" />
+      <div className="container mx-auto p-4 md:p-8 space-y-8 relative z-10 w-full animate-in fade-in duration-500">
+        <section className="rounded-2xl border border-gray-200/50 dark:border-gray-800/50 bg-white/70 dark:bg-card/60 p-6 md:p-8 shadow-sm backdrop-blur-xl">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/15 text-rose-600 text-xs md:text-sm font-semibold mb-3">
@@ -79,7 +81,7 @@ export default function EmergencyPage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border bg-white/75 dark:bg-card p-6 shadow-xl backdrop-blur-md">
+        <section className="rounded-2xl border border-gray-200/50 dark:border-gray-800/50 bg-white/70 dark:bg-card/60 p-6 shadow-sm backdrop-blur-xl">
           <h2 className="text-2xl font-bold mb-4">Emergency Pages</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             <Link href="/emergency/blood" className="flex items-center gap-2 rounded-xl border px-4 py-3 hover:bg-muted transition-colors text-base font-medium">
