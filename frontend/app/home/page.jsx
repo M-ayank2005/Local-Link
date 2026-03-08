@@ -1,13 +1,46 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import {
   ShoppingBag,
   Leaf,
   Wrench,
   Briefcase,
   HeartPulse,
+  LayoutDashboard,
+  ShieldCheck,
 } from 'lucide-react';
 
-export default function LandingPage() {
+const SERVER_API_BASE = process.env.BACKEND_URL || 'http://localhost:5001/api';
+
+async function ensureAuthenticated() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+
+  if (!token) {
+    redirect('/auth');
+  }
+
+  try {
+    const response = await fetch(`${SERVER_API_BASE}/auth/me`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        Cookie: `token=${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      redirect('/auth');
+    }
+  } catch (_error) {
+    redirect('/auth');
+  }
+}
+
+export default async function HomePage() {
+  await ensureAuthenticated();
+
   const modules = [
     {
       title: 'Apartment Commerce',
@@ -43,7 +76,7 @@ export default function LandingPage() {
     },
     {
       title: 'Emergency Network',
-      description: 'Verified network for blood donors and oxygen supply.',
+      description: 'Verified network for blood donors, and oxygen supply.',
       href: '#',
       icon: <HeartPulse className="w-8 h-8" />,
       bgClass: 'bg-rose-500/10 hover:border-rose-500/50 hover:shadow-rose-500/5',
@@ -57,29 +90,23 @@ export default function LandingPage() {
       <div className="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-purple-400/20 dark:bg-violet-500/10 blur-[100px] pointer-events-none -z-10 animate-pulse delay-1000" />
 
       <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl inset-0 z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center mb-24">
           <div className="lg:col-span-3 space-y-6">
             <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm tracking-wide mb-2">
-              Hyperlocal Services Platform
+              Welcome Back
             </div>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
-              Welcome to <span className="bg-gray-900/40 bg-clip-text text-transparent">Local Link</span>
+              Local Link <span className="bg-gray-900/40 bg-clip-text text-transparent">Home</span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl">
-              Explore all community services from one place. To use any service, login/signup from the header button.
+              Your neighborhood services dashboard is ready. Continue with the modules below.
             </p>
-            <Link
-              href="/auth"
-              className="inline-flex items-center px-5 py-3 rounded-xl font-semibold text-primary-foreground bg-primary hover:bg-primary/90 transition-all"
-            >
-              Login / Signup
-            </Link>
           </div>
         </div>
 
-        <section className="pt-6 border-t">
+        <section className="pt-4 border-t">
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold tracking-tight">Available Services</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Our Services</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
               {modules.map((mod, idx) => (
                 <Link key={idx} href={mod.href} className={`group p-6 rounded-2xl border bg-card transition-all duration-300 flex flex-col items-start ${mod.bgClass}`}>
@@ -90,6 +117,18 @@ export default function LandingPage() {
                   <p className="text-sm text-muted-foreground line-clamp-3">{mod.description}</p>
                 </Link>
               ))}
+            </div>
+
+            <div className="mt-12 pt-8 flex flex-col sm:flex-row items-center justify-center gap-6">
+              <Link href="/dashboard/shopkeeper" className="flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group">
+                <LayoutDashboard className="w-4 h-4 mr-2 group-hover:text-blue-500 transition-colors" />
+                Shopkeeper Portal
+              </Link>
+              <span className="hidden sm:inline border-r h-4" />
+              <Link href="/admin" className="flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group">
+                <ShieldCheck className="w-4 h-4 mr-2 group-hover:text-emerald-500 transition-colors" />
+                Admin Home
+              </Link>
             </div>
           </div>
         </section>
