@@ -139,7 +139,7 @@ export default function FoodFeed() {
         {!isLoggedIn && (
           <div className="mb-8 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-300 p-4 rounded-xl flex items-center gap-3 shadow-sm backdrop-blur-sm">
             <ShieldAlert className="w-6 h-6 flex-shrink-0" />
-            <p>You are viewing as a guest. Please <Link href="/" className="font-bold underline hover:text-amber-900 dark:hover:text-amber-100">log in</Link> to claim or post food to the network.</p>
+            <p>You are viewing as a guest. Please <Link href="/login" className="font-bold underline hover:text-amber-900 dark:hover:text-amber-100">log in</Link> to claim or post food to the network.</p>
           </div>
         )}
 
@@ -226,9 +226,9 @@ export default function FoodFeed() {
                             {food.price > 0 ? 'Pay & Claim' : 'Claim'} {validClaimQty} Item(s)
                           </button>
                         ) : (
-                          <span className="block text-center text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-100 dark:border-amber-800/50">
+                          <Link href="/login" className="block text-center text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-100 dark:border-amber-800/50 hover:bg-amber-100 transition-colors">
                             Log in to claim
-                          </span>
+                          </Link>
                         )
                       ) : (
                         <button disabled className={`w-full font-bold py-2.5 px-5 rounded-xl cursor-not-allowed flex items-center justify-center gap-2 ${

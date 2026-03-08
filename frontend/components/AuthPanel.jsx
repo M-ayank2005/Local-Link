@@ -9,7 +9,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
 
 const initialSignupState = {
   fullName: '',
@@ -150,6 +150,11 @@ export function AuthPanel() {
       if (!response.ok) {
         setErrorMessage(data.message || 'Authentication request failed');
         return;
+      }
+
+      localStorage.setItem('authToken', data.token);
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
       }
 
       if (mode === 'login') {

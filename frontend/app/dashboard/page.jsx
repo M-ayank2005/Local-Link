@@ -11,7 +11,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
-const SERVER_API_BASE = process.env.BACKEND_URL || 'http://localhost:5001/api';
+const SERVER_API_BASE = process.env.BACKEND_URL || 'http://localhost:5000/api';
 
 async function ensureAuthenticated() {
   const cookieStore = await cookies();

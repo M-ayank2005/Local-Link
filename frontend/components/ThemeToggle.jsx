@@ -13,7 +13,7 @@ export function ThemeToggle() {
   const [userName, setUserName] = useState("");
   const pathname = usePathname();
   const router = useRouter();
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5001/api";
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
 
   useEffect(() => {
     setMounted(true);

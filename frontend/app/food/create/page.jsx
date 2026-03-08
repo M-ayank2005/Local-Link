@@ -23,7 +23,7 @@ export default function CreateFoodListing() {
     const token = localStorage.getItem('authToken');
     if (!token) {
       alert("You must be logged in to post food.");
-      router.push('/'); 
+      router.push('/login'); 
     }
   }, [router]);
 

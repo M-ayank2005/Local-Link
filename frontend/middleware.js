@@ -6,7 +6,7 @@ const PUBLIC_AUTH_PAGES = ['/login', '/auth', '/landing'];
 const API_BASE_URL =
   process.env.BACKEND_URL ||
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  'http://localhost:5001/api';
+  'http://localhost:5000/api';
 
 async function isAuthenticated(request) {
   const token = request.cookies.get('token')?.value;

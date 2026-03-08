@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import HomePage from './home/page';
 
-const SERVER_API_BASE = process.env.BACKEND_URL || 'http://localhost:5001/api';
+const SERVER_API_BASE = process.env.BACKEND_URL || 'http://localhost:5000/api';
 
 async function ensureAuthenticated() {
   const cookieStore = await cookies();
