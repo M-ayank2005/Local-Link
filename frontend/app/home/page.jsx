@@ -38,7 +38,7 @@ export default function HomePage() {
     {
       title: 'Skill Exchange',
       description: 'Hyperlocal marketplace for electricians, tutors, helpers.',
-      href: '#',
+      href: '/skills',
       icon: <Briefcase className="w-8 h-8" />,
       bgClass: 'bg-violet-500/10 hover:border-violet-500/50 hover:shadow-violet-500/5',
       iconBoxClass: 'bg-violet-500/10 text-violet-500',
