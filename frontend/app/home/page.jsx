@@ -46,7 +46,7 @@ export default function HomePage() {
     {
       title: 'Emergency Network',
       description: 'Verified network for blood donors, and oxygen supply.',
-      href: '#',
+      href: '/emergency',
       icon: <HeartPulse className="w-8 h-8" />,
       bgClass: 'bg-rose-500/10 hover:border-rose-500/50 hover:shadow-rose-500/5',
       iconBoxClass: 'bg-rose-500/10 text-rose-500',
