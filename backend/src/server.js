@@ -28,6 +28,8 @@ app.use('/api/v1/admin', require('./routes/commerce/adminRoutes'));
 app.use('/api/v1/emergency', require('./routes/emergency/emergencyRoutes'));
 app.use('/api/food', foodRoutes);
 app.use('/api/v1/skills', skillsRoutes);
+app.use('/api/v1/resources', require('./routes/resources/resourceRoutes'));
+app.use('/api/v1/bookings', require('./routes/resources/bookingRoutes'));
 
 // Existing root route
 app.get('/health', (req, res) => {
