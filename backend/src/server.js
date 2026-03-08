@@ -19,11 +19,13 @@ app.use(
   })
 );
 
+const foodRoutes = require('./routes/food/foodRoutes');
 app.use('/api/auth', require('./routes/userRoutes'));
 app.use('/api/v1/commerce', require('./routes/commerce/commerceRoutes'));
 app.use('/api/v1/shopkeeper', require('./routes/commerce/shopkeeperRoutes'));
 app.use('/api/v1/admin', require('./routes/commerce/adminRoutes'));
 app.use('/api/v1/emergency', require('./routes/emergency/emergencyRoutes'));
+app.use('/api/food', foodRoutes);
 
 // Existing root route
 app.get('/health', (req, res) => {

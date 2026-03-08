@@ -22,7 +22,7 @@ export default function HomePage() {
     {
       title: 'Food Waste Management',
       description: 'Platform for restaurants and users to donate surplus food.',
-      href: '#',
+      href: '/food',
       icon: <Leaf className="w-8 h-8" />,
       bgClass: 'bg-emerald-500/10 hover:border-emerald-500/50 hover:shadow-emerald-500/5',
       iconBoxClass: 'bg-emerald-500/10 text-emerald-500',
