@@ -7,20 +7,24 @@ const createToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn
 const TOKEN_COOKIE_NAME = 'token';
 
 const setAuthCookie = (res, token) => {
+  const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
   res.cookie(TOKEN_COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: '/',
   });
 };
 
 const clearAuthCookie = (res) => {
+  const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
   res.cookie(TOKEN_COOKIE_NAME, '', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     expires: new Date(0),
+    path: '/',
   });
 };
 
