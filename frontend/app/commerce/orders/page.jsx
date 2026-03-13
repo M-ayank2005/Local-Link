@@ -37,22 +37,12 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-      const token = localStorage.getItem('authToken');
-      
-      const payload = {
-        shopId: cart.shopId,
-        items: cart.items.map(i => ({ product: i._id, quantity: i.quantity, price: i.price, name: i.name })),
-        deliveryType,
-        paymentMethod,
-        totalAmount: total,
-      };
-
       const response = await fetch(`${API_BASE_URL}/v1/commerce/orders`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` })
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(payload)
       });
       

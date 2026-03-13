@@ -23,7 +23,9 @@ export default function ResourceDetailPage() {
     const fetchResource = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/resources/${id}`);
+        const res = await fetch(`${API_BASE}/resources/${id}`, {
+          credentials: 'include'
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to load resource');
         setResource(data.data);

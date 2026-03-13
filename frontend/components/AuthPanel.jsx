@@ -154,7 +154,6 @@ export function AuthPanel() {
         return;
       }
 
-      localStorage.setItem('authToken', data.token);
       if (data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
       }

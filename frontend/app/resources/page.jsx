@@ -41,10 +41,9 @@ export default function ResourcesPage() {
       const params = new URLSearchParams({ lng, lat, distance: 10000 });
       if (category) params.append('category', category);
 
-      const token = localStorage.getItem('authToken');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const res = await fetch(`${API_BASE}/resources?${params}`, { headers });
+      const res = await fetch(`${API_BASE}/resources?${params}`, { 
+        credentials: 'include' 
+      });
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || 'Failed to fetch resources');

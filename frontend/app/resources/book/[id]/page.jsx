@@ -23,16 +23,14 @@ export default function BookResourcePage() {
   const [confirmedHighRisk, setConfirmedHighRisk] = useState(false);
   const [success, setSuccess] = useState(null);
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-  const authHeaders = {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
+  // authHeaders removed in favor of credentials: 'include' and direct fetch options
 
   useEffect(() => {
     const fetchResource = async () => {
       try {
-        const res = await fetch(`${API_BASE}/resources/${id}`);
+        const res = await fetch(`${API_BASE}/resources/${id}`, {
+          credentials: 'include'
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
         setResource(data.data);
@@ -60,15 +58,15 @@ export default function BookResourcePage() {
 
   const handleBook = async (e) => {
     e.preventDefault();
-    setError('');
-    setHighRiskWarning(null);
-
-    if (!token) {
+    const user = localStorage.getItem('user');
+    if (!user) {
       setError('Please log in to book a resource.');
+      setBookingLoading(false);
       return;
     }
     if (days <= 0) {
       setError('Please select valid dates.');
+      setBookingLoading(false);
       return;
     }
 
@@ -76,7 +74,10 @@ export default function BookResourcePage() {
     try {
       const res = await fetch(`${API_BASE}/bookings`, {
         method: 'POST',
-        headers: authHeaders,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
         body: JSON.stringify({
           resourceId: id,
           fromDate,

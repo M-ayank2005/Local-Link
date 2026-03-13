@@ -15,9 +15,8 @@ export default function OrderHistoryPage() {
     const fetchOrders = async () => {
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-        const token = localStorage.getItem('authToken');
         const res = await fetch(`${API_BASE_URL}/commerce/orders/my`, {
-          headers: { ...(token && { Authorization: `Bearer ${token}` }) }
+          credentials: 'include'
         });
         if (res.ok) {
           const json = await res.json();

@@ -57,16 +57,14 @@ export default function MyItemsPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [userCoords, setUserCoords] = useState(null);
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-  const authHeaders = {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
+  // authHeaders removed in favor of credentials: 'include' and direct fetch options
 
   const fetchItems = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/resources/my-items`, { headers: authHeaders });
+      const res = await fetch(`${API_BASE}/resources/my-items`, { 
+        credentials: 'include' 
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setItems(data.data || []);
@@ -79,7 +77,9 @@ export default function MyItemsPage() {
 
   const fetchMyBookings = async () => {
     try {
-      const res = await fetch(`${API_BASE}/bookings/my-bookings`, { headers: authHeaders });
+      const res = await fetch(`${API_BASE}/bookings/my-bookings`, { 
+        credentials: 'include' 
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setMyBookings(data.data || []);
@@ -147,9 +147,12 @@ export default function MyItemsPage() {
         ? `${API_BASE}/resources/${editingItem._id}`
         : `${API_BASE}/resources`;
       const method = editingItem ? 'PUT' : 'POST';
-      const res = await fetch(url, {
+      const response = await fetch(url, {
         method,
-        headers: authHeaders,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
         body: JSON.stringify(body),
       });
       const data = await res.json();
@@ -168,7 +171,7 @@ export default function MyItemsPage() {
     try {
       const res = await fetch(`${API_BASE}/resources/${itemId}`, {
         method: 'DELETE',
-        headers: authHeaders,
+        credentials: 'include'
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -182,7 +185,10 @@ export default function MyItemsPage() {
     try {
       const res = await fetch(`${API_BASE}/bookings/${bookingId}/return`, {
         method: 'PUT',
-        headers: authHeaders,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
         body: JSON.stringify({ condition }),
       });
       const data = await res.json();

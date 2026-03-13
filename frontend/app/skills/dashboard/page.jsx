@@ -71,34 +71,29 @@ export default function ProviderDashboard() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    setIsLoggedIn(!!token);
+    const user = localStorage.getItem('user');
+    setIsLoggedIn(!!user);
 
-    if (!token) {
+    if (!user) {
       router.push('/login');
       return;
     }
 
-    // Check user role from cached user data first
-    const cachedUser = localStorage.getItem('user');
-    if (cachedUser) {
-      try {
-        const userData = JSON.parse(cachedUser);
-        const userRole = userData.role;
-        const isServiceProvider = userRole === 'service_provider' || userRole === 'admin';
-        setIsProvider(isServiceProvider);
-        setCheckingRole(false);
-        
-        if (isServiceProvider) {
-          fetchDashboardData();
-        } else {
-          setLoading(false);
-        }
-      } catch (e) {
-        checkUserRole(token);
+    try {
+      const userData = JSON.parse(user);
+      const userRole = userData.role;
+      const isServiceProvider = userRole === 'service_provider' || userRole === 'admin';
+      setIsProvider(isServiceProvider);
+      setCheckingRole(false);
+      
+      if (isServiceProvider) {
+        fetchDashboardData();
+      } else {
+        setLoading(false);
       }
-    } else {
-      checkUserRole(token);
+    } catch (e) {
+      setCheckingRole(false);
+      setLoading(false);
     }
 
     if ("geolocation" in navigator) {
@@ -110,63 +105,24 @@ export default function ProviderDashboard() {
         () => console.log("Location access denied")
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const checkUserRole = async (token) => {
-    try {
-      // Fetch user profile to check role
-      const response = await fetch(`${API_BASE_URL}/v1/users/me`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-        credentials: 'include',
-      });
 
-      if (response.ok) {
-        const data = await response.json();
-        // API returns { user: { role: ... } }
-        const userRole = data.user?.role || data.data?.role || data.role;
-        const isServiceProvider = userRole === 'service_provider' || userRole === 'admin';
-        setIsProvider(isServiceProvider);
-        
-        if (isServiceProvider) {
-          fetchDashboardData();
-        } else {
-          setLoading(false);
-        }
-      } else {
-        // API failed - deny access by default
-        setIsProvider(false);
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error('Error checking user role:', error);
-      // On error - deny access for security
-      setIsProvider(false);
-      setLoading(false);
-    } finally {
-      setCheckingRole(false);
-    }
-  };
 
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      
       // Fetch dashboard stats
       const statsRes = await fetch(`${API_BASE_URL}/v1/skills/provider/dashboard`, {
-        headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
       });
 
       // Fetch services
       const servicesRes = await fetch(`${API_BASE_URL}/v1/skills/provider/services`, {
-        headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
       });
 
       // Fetch bookings
       const bookingsRes = await fetch(`${API_BASE_URL}/v1/skills/provider/bookings`, {
-        headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
       });
 
@@ -223,12 +179,10 @@ export default function ProviderDashboard() {
 
   const handleStatusUpdate = async (bookingId, newStatus) => {
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/v1/skills/provider/bookings/${bookingId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         credentials: 'include',
         body: JSON.stringify({ status: newStatus }),
@@ -247,10 +201,8 @@ export default function ProviderDashboard() {
 
   const handleToggleService = async (serviceId) => {
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/v1/skills/provider/services/${serviceId}/toggle`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
       });
 
@@ -270,7 +222,6 @@ export default function ProviderDashboard() {
     setSubmitting(true);
 
     try {
-      const token = localStorage.getItem('authToken');
       const serviceData = {
         ...newService,
         pricePerHour: Number(newService.pricePerHour),
@@ -287,7 +238,6 @@ export default function ProviderDashboard() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         credentials: 'include',
         body: JSON.stringify(serviceData),

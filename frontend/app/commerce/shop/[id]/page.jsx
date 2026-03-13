@@ -19,7 +19,9 @@ export default function ShopInventoryPage() {
     const fetchShopDetails = async () => {
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-        const res = await fetch(`${API_BASE_URL}/v1/commerce/shops/${shopId}`);
+        const res = await fetch(`${API_BASE_URL}/v1/commerce/shops/${shopId}`, {
+          credentials: 'include'
+        });
         if (res.ok) {
           const json = await res.json();
           const data = json.data || json; 

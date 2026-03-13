@@ -13,12 +13,9 @@ export default function ShopkeeperDashboard() {
     const fetchData = async () => {
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-        const token = localStorage.getItem('authToken');
-        const headers = { ...(token && { Authorization: `Bearer ${token}` }) };
-
         const [invRes, ordRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/v1/commerce/shopkeeper/inventory`, { headers }),
-          fetch(`${API_BASE_URL}/v1/commerce/shopkeeper/orders`, { headers })
+          fetch(`${API_BASE_URL}/v1/commerce/shopkeeper/inventory`, { credentials: 'include' }),
+          fetch(`${API_BASE_URL}/v1/commerce/shopkeeper/orders`, { credentials: 'include' })
         ]);
 
         if (invRes.ok && ordRes.ok) {
@@ -51,13 +48,12 @@ export default function ShopkeeperDashboard() {
   const updateOrderStatus = async (id, newStatus) => {
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-      const token = localStorage.getItem('authToken');
       const res = await fetch(`${API_BASE_URL}/v1/commerce/shopkeeper/orders/${id}/status`, {
         method: 'PUT',
         headers: { 
-          'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` })
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ status: newStatus })
       });
       if (res.ok) {
@@ -107,13 +103,12 @@ export default function ShopkeeperDashboard() {
     } else {
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-        const token = localStorage.getItem('authToken');
         const res = await fetch(`${API_BASE_URL}/v1/commerce/shopkeeper/inventory`, {
           method: 'POST',
           headers: { 
-            'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` })
+            'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify(productForm)
         });
         if (res.ok) {

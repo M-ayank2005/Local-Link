@@ -14,7 +14,9 @@ export default function CommercePage() {
     const fetchShops = async (lng, lat) => {
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-        const res = await fetch(`${API_BASE_URL}/v1/commerce/shops?lng=${lng}&lat=${lat}&distance=10000`);
+        const res = await fetch(`${API_BASE_URL}/v1/commerce/shops?lng=${lng}&lat=${lat}&distance=10000`, {
+          credentials: 'include'
+        });
         // The endpoint may return { success: true, count: X, data: shops }
         // We'll safely parse and extract the array.
         if (res.ok) {

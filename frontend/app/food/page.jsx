@@ -26,8 +26,8 @@ export default function FoodFeed() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    setIsLoggedIn(!!token);
+    const user = localStorage.getItem('user');
+    setIsLoggedIn(!!user);
 
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -59,8 +59,8 @@ export default function FoodFeed() {
 
   const handleClaim = async (foodId, maxQty, price) => {
     try {
-      const token = localStorage.getItem('authToken'); 
-      if (!token) return alert("Please log in to claim food!");
+      const user = localStorage.getItem('user'); 
+      if (!user) return alert("Please log in to claim food!");
 
       const qty = claimQuantities[foodId] || 1; 
 
@@ -73,9 +73,9 @@ export default function FoodFeed() {
       const response = await fetch(`${API_BASE_URL}/food/${foodId}/claim`, {
         method: 'PUT',
         headers: { 
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json' 
         },
+        credentials: 'include',
         body: JSON.stringify({ quantity: qty })
       });
 

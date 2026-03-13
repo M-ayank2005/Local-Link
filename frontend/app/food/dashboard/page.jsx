@@ -15,14 +15,14 @@ export default function FoodDashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    setIsLoggedIn(!!token);
+    const user = localStorage.getItem('user');
+    setIsLoggedIn(!!user);
     
-    if (token) {
+    if (user) {
       Promise.all([
-        fetchMyListings(token), 
-        fetchIncomingOrders(token),
-        fetchMyClaims(token)
+        fetchMyListings(), 
+        fetchIncomingOrders(),
+        fetchMyClaims()
       ])
       .finally(() => setLoading(false));
     } else {
@@ -30,10 +30,10 @@ export default function FoodDashboard() {
     }
   }, []);
 
-  const fetchMyListings = async (token) => {
+  const fetchMyListings = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/food/my-posts`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        credentials: 'include'
       });
       const result = await response.json();
       if (result.success) setMyListings(result.data);
@@ -42,10 +42,10 @@ export default function FoodDashboard() {
     }
   };
 
-  const fetchIncomingOrders = async (token) => {
+  const fetchIncomingOrders = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/food/my-incoming-orders`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        credentials: 'include'
       });
       const result = await response.json();
       if (result.success) setIncomingOrders(result.data);
@@ -54,11 +54,11 @@ export default function FoodDashboard() {
     }
   };
 
-  const fetchMyClaims = async (token) => {
+  const fetchMyClaims = async () => {
     try {
       // Logic changed: Now fetches FoodOrders, not FoodListings
       const response = await fetch(`${API_BASE_URL}/food/my-claims`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        credentials: 'include'
       });
       const result = await response.json();
       if (result.success) setMyClaims(result.data);
@@ -71,15 +71,14 @@ export default function FoodDashboard() {
     if (!confirm("Are you sure the food has been picked up? This action cannot be undone.")) return;
 
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/food/order/${orderId}/pickup`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
+        credentials: 'include'
       });
 
       if (response.ok) {
         // Refresh orders
-        fetchIncomingOrders(token);
+        fetchIncomingOrders();
       } else {
         const result = await response.json();
         alert(result.message || "Failed to update status");

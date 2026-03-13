@@ -40,8 +40,8 @@ export default function ProviderDetailPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    setIsLoggedIn(!!token);
+    const user = localStorage.getItem('user');
+    setIsLoggedIn(!!user);
     fetchService();
     fetchReviews();
     // eslint-disable-next-line react-hooks/exhaustive-deps

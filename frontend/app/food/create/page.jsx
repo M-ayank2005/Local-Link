@@ -22,8 +22,8 @@ export default function CreateFoodListing() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
+    const user = localStorage.getItem('user');
+    if (!user) {
       alert("You must be logged in to post food.");
       router.push('/login'); 
     }
@@ -51,15 +51,15 @@ export default function CreateFoodListing() {
     };
 
     try {
-      const token = localStorage.getItem('authToken'); 
-      if (!token) return router.push('/');
+      const user = localStorage.getItem('user');
+      if (!user) return router.push('/login');
 
       const response = await fetch(`${API_BASE_URL}/food`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
         },
+        credentials: 'include',
         body: JSON.stringify(payload)
       });
 

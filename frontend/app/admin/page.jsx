@@ -11,9 +11,8 @@ export default function AdminPage() {
     const fetchShops = async () => {
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-        const token = localStorage.getItem('authToken');
         const res = await fetch(`${API_BASE_URL}/v1/admin/shops`, {
-          headers: { ...(token && { Authorization: `Bearer ${token}` }) }
+          credentials: 'include'
         });
         if (res.ok) {
           const json = await res.json();
@@ -40,13 +39,12 @@ export default function AdminPage() {
   const updateStatus = async (id, status) => {
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-      const token = localStorage.getItem('authToken');
       const res = await fetch(`${API_BASE_URL}/v1/admin/shops/${id}/verify`, {
         method: 'PUT',
         headers: { 
-          'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` })
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ status })
       });
       if (res.ok) {

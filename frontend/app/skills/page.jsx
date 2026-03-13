@@ -58,23 +58,14 @@ export default function SkillsPage() {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    setIsLoggedIn(!!token);
+    const user = localStorage.getItem('user');
+    setIsLoggedIn(!!user);
 
     // Check if user is a service provider from cached user data
-    if (token) {
-      const cachedUser = localStorage.getItem('user');
-      if (cachedUser) {
-        try {
-          const userData = JSON.parse(cachedUser);
-          const userRole = userData.role;
-          setIsProvider(userRole === 'service_provider' || userRole === 'admin');
-        } catch (e) {
-          checkUserRole(token);
-        }
-      } else {
-        checkUserRole(token);
-      }
+    if (user) {
+      const userData = JSON.parse(user);
+      const userRole = userData.role;
+      setIsProvider(userRole === 'service_provider' || userRole === 'admin');
     }
 
     if ("geolocation" in navigator) {
@@ -88,22 +79,8 @@ export default function SkillsPage() {
     }
   }, []);
 
-  const checkUserRole = async (token) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/v1/users/me`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        // API returns { user: { role: ... } }
-        const userRole = data.user?.role || data.data?.role || data.role;
-        setIsProvider(userRole === 'service_provider' || userRole === 'admin');
-      }
-    } catch (error) {
-      console.log('Role check failed');
-    }
-  };
+  // Role check is now handled via localStorage or could be refreshed via /me
+  // checkUserRole function removed as we rely on /me for session and localStorage for hints
 
   useEffect(() => {
     fetchServices();

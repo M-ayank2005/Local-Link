@@ -45,13 +45,12 @@ export default function RegisterShopPage() {
     
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/admin/shops`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` })
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
           name: formData.name,
           address: formData.address,

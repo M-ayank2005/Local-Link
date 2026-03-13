@@ -8,8 +8,9 @@ import {
   HeartPulse,
 } from 'lucide-react';
 
-export default function LandingPage({ searchParams }) {
-  const nextPath = searchParams?.next ? String(searchParams.next) : '/';
+export default async function LandingPage({ searchParams }) {
+  const params = await searchParams;
+  const nextPath = params?.next ? String(params.next) : '/';
   const signupLink = `/login?mode=signup&next=${encodeURIComponent(nextPath)}`;
   const modules = [
     {

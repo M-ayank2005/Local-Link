@@ -29,8 +29,8 @@ function CheckoutContent({ id }) {
   const handlePayment = async () => {
     try {
       setPaying(true);
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      const user = localStorage.getItem('user');
+      if (!user) {
         alert("Please log in first.");
         setPaying(false);
         return;
@@ -39,9 +39,9 @@ function CheckoutContent({ id }) {
       const response = await fetch(`${API_BASE_URL}/food/${id}/claim`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ quantity: qty })
       });
 

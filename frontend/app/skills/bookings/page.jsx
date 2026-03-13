@@ -56,10 +56,10 @@ function BookingsContent() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    setIsLoggedIn(!!token);
+    const user = localStorage.getItem('user');
+    setIsLoggedIn(!!user);
 
-    if (!token) {
+    if (!user) {
       router.push('/login');
       return;
     }
@@ -98,11 +98,7 @@ function BookingsContent() {
 
   const fetchMyBookings = async () => {
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/v1/skills/bookings/my`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
         credentials: 'include',
       });
 
@@ -140,7 +136,6 @@ function BookingsContent() {
     setError('');
 
     try {
-      const token = localStorage.getItem('authToken');
       const { total } = calculateTotal();
 
       const bookingData = {
@@ -170,7 +165,6 @@ function BookingsContent() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         credentials: 'include',
         body: JSON.stringify(bookingData),
