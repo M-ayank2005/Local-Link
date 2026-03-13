@@ -12,6 +12,11 @@ exports.protect = async (req, res, next) => {
       token = req.cookies.token;
     }
 
+    if (!token && process.env.NODE_ENV === 'production') {
+      console.log('Production Auth Failure: Cookies present:', !!req.cookies);
+      if (req.cookies) console.log('Cookie keys:', Object.keys(req.cookies));
+    }
+
     if (!token) {
       return res.status(401).json({ message: 'Not authorized, token missing' });
     }
