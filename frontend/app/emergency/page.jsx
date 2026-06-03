@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { HeartPulse, Droplets, Pill, Ambulance, Activity, MapPin, PackageSearch, ShieldAlert } from 'lucide-react';
+import { resolveApiBase } from '@/lib/apiBase';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = resolveApiBase();
 
 export default function EmergencyPage() {
   const [stats, setStats] = useState({
