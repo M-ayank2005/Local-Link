@@ -374,7 +374,7 @@ exports.getDashboardStats = async (req, res) => {
     ]);
 
     // Get recent bookings
-    const recentBookings = await Booking.find({ provider: providerId })
+    const recentBookings = await SkillBooking.find({ provider: providerId })
       .populate('service', 'title category')
       .populate('customer', 'fullName phone')
       .sort({ createdAt: -1 })

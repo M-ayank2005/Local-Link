@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { MapPin, Wrench, Search, Filter, Star, TrendingUp, BellPlus, X, CheckCircle } from 'lucide-react';
+import { MapPin, Wrench, Search, Filter, Star, TrendingUp, BellPlus, X, CheckCircle, Sparkles } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1';
 
@@ -46,6 +46,9 @@ export default function ResourcesPage() {
   const [demandLoading, setDemandLoading] = useState(false);
   const [demandResult, setDemandResult] = useState(null); // { matched, matches?, message }
 
+  const [isSmartSearching, setIsSmartSearching] = useState(false);
+  const [smartSearchExplanation, setSmartSearchExplanation] = useState('');
+
   const fetchResources = async (coords) => {
     setIsLoading(true);
     setError('');
@@ -67,6 +70,36 @@ export default function ResourcesPage() {
       setResources(MOCK_RESOURCES);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSmartSearch = async () => {
+    if (!search || !userCoords) return;
+    setIsSmartSearching(true);
+    setSmartSearchExplanation('');
+    setError('');
+    try {
+      const res = await fetch(`${API_BASE}/resources/ai/smart-search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: search,
+          lng: userCoords.lng,
+          lat: userCoords.lat,
+          distance: 10000,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || data.error || 'Failed to smart search');
+      setResources(data.data || []);
+      if (data.aiData && data.aiData.explanation) {
+        setSmartSearchExplanation(data.aiData.explanation);
+      }
+      setMlRanked(false);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSmartSearching(false);
     }
   };
 
@@ -172,15 +205,28 @@ export default function ResourcesPage() {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search resources..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl border bg-background text-foreground focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 outline-none text-sm"
-          />
+        <div className="relative flex-1 flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search or ask AI (e.g. 'need items for a camping trip')..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                if (e.target.value === '') setSmartSearchExplanation('');
+              }}
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border bg-background text-foreground focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 outline-none text-sm"
+            />
+          </div>
+          <button
+            onClick={handleSmartSearch}
+            disabled={isSmartSearching || !search}
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+          >
+            {isSmartSearching ? <Sparkles className="w-4 h-4 animate-pulse" /> : <Sparkles className="w-4 h-4" />}
+            <span className="hidden sm:inline">Smart Search</span>
+          </button>
         </div>
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-muted-foreground" />
@@ -201,6 +247,14 @@ export default function ResourcesPage() {
       {error && (
         <div className="p-3 text-sm bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl">
           Backend unreachable — showing sample data. {error}
+        </div>
+      )}
+
+      {/* Smart Search Explanation Banner */}
+      {smartSearchExplanation && (
+        <div className="p-3 text-sm bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300 rounded-xl flex items-start gap-2">
+          <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <p>{smartSearchExplanation}</p>
         </div>
       )}
 

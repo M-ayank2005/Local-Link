@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Wrench, Plus, Edit2, Trash2, X, Check,
-  BookOpen, TrendingUp, BellPlus, Users, Calendar, IndianRupee,
+  BookOpen, TrendingUp, BellPlus, Users, Calendar, IndianRupee, Sparkles
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1';
@@ -61,6 +61,10 @@ export default function MyItemsPage() {
   const [formError, setFormError] = useState('');
   const [formLoading, setFormLoading] = useState(false);
 
+  // Pricing Assistant
+  const [isPricingLoading, setIsPricingLoading] = useState(false);
+  const [pricingSuggestion, setPricingSuggestion] = useState(null);
+
   // Fulfill modal
   const [fulfillDemand, setFulfillDemand] = useState(null);
   const [selectedResourceId, setSelectedResourceId] = useState('');
@@ -113,9 +117,10 @@ export default function MyItemsPage() {
   }, []);
 
   // ── Item CRUD ─────────────────────────────────────────────────────────────
-  const openAdd = () => { setEditingItem(null); setForm(emptyForm); setFormError(''); setShowModal(true); };
+  const openAdd = () => { setEditingItem(null); setForm(emptyForm); setFormError(''); setPricingSuggestion(null); setShowModal(true); };
   const openEdit = (item) => {
     setEditingItem(item);
+    setPricingSuggestion(null);
     setForm({
       title: item.title, description: item.description || '', category: item.category,
       condition: item.condition, pricePerDay: item.pricePerDay, depositAmount: item.depositAmount,
@@ -152,6 +157,36 @@ export default function MyItemsPage() {
       setShowModal(false); fetchItems();
     } catch (err) { setFormError(err.message); }
     finally { setFormLoading(false); }
+  };
+
+  const handleGetPricing = async () => {
+    if (!form.category || !form.condition) {
+      alert("Please select a category and condition first.");
+      return;
+    }
+    setIsPricingLoading(true);
+    setPricingSuggestion(null);
+    try {
+      const res = await fetch(`${API_BASE}/resources/ai/pricing`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: form.category,
+          condition: form.condition,
+          itemDetails: form.title + " " + form.description,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || data.error);
+      setPricingSuggestion(data.data);
+      if (data.data?.recommendedPrice?.min) {
+        setForm(prev => ({ ...prev, pricePerDay: data.data.recommendedPrice.min }));
+      }
+    } catch (err) {
+      alert("Pricing error: " + err.message);
+    } finally {
+      setIsPricingLoading(false);
+    }
   };
 
   const handleDelete = async (itemId) => {
@@ -423,7 +458,15 @@ export default function MyItemsPage() {
                 { label: 'Rules (optional)', name: 'rules', type: 'textarea', required: false },
               ].map((field) => (
                 <div key={field.name} className="space-y-1">
-                  <label className="text-sm font-medium">{field.label}</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">{field.label}</label>
+                    {field.name === 'pricePerDay' && (
+                      <button type="button" onClick={handleGetPricing} disabled={isPricingLoading} className="text-xs text-violet-600 hover:text-violet-700 flex items-center gap-1 transition-colors disabled:opacity-50">
+                        {isPricingLoading ? <Sparkles className="w-3 h-3 animate-pulse" /> : <Sparkles className="w-3 h-3"/>} 
+                        AI Pricing
+                      </button>
+                    )}
+                  </div>
                   {field.type === 'textarea' ? (
                     <textarea name={field.name} required={field.required} value={form[field.name]} onChange={handleFormChange} rows={2}
                       className="w-full p-2.5 rounded-xl border bg-background text-foreground text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 outline-none resize-none" />
@@ -449,6 +492,15 @@ export default function MyItemsPage() {
                   </select>
                 </div>
               </div>
+              
+              {pricingSuggestion && (
+                <div className="p-3 text-sm bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300 rounded-xl space-y-1">
+                  <p className="font-semibold flex items-center gap-1"><Sparkles className="w-4 h-4"/> Suggested: ₹{pricingSuggestion.recommendedPrice?.min} - ₹{pricingSuggestion.recommendedPrice?.max}/day</p>
+                  <p>{pricingSuggestion.explanation}</p>
+                  <p className="text-xs mt-1">💡 Tip: {pricingSuggestion.tip}</p>
+                </div>
+              )}
+
               {formError && <p className="text-sm text-red-500 bg-red-500/10 px-3 py-2 rounded-lg">{formError}</p>}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-2.5 rounded-xl border text-sm font-medium hover:bg-muted transition-colors">Cancel</button>

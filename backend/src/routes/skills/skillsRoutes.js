@@ -25,6 +25,13 @@ const {
   respondToReview,
 } = require('../../controllers/skills/providerController');
 
+const {
+  getPricingSuggestion,
+  generateJobDescription,
+  getAvailabilitySuggestion,
+  getDemandInsights,
+} = require('../../controllers/skills/aiController');
+
 // ============ PUBLIC ROUTES ============
 
 // Get all services with filters, search, sort
@@ -54,6 +61,16 @@ router.post('/bookings/:bookingId/review', protect, addReview);
 
 // Provider Dashboard
 router.get('/provider/dashboard', protect, authorizeRoles('service_provider', 'admin'), getDashboardStats);
+
+// ── AI Assistant Routes ──────────────────────────────────────────────────────
+// Suggest price range based on service / experience / location
+router.post('/provider/ai/pricing', protect, authorizeRoles('service_provider', 'admin'), getPricingSuggestion);
+// Generate a professional job description
+router.post('/provider/ai/description', protect, authorizeRoles('service_provider', 'admin'), generateJobDescription);
+// Suggest best availability slots from booking history
+router.get('/provider/ai/availability', protect, authorizeRoles('service_provider', 'admin'), getAvailabilitySuggestion);
+// Admin — demand trend insights
+router.get('/admin/ai/demand-insights', protect, authorizeRoles('admin'), getDemandInsights);
 
 // Provider Services
 router.get('/provider/services', protect, authorizeRoles('service_provider', 'admin'), getMyServices);

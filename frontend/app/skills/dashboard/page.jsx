@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -18,15 +18,18 @@ import {
   XCircle,
   Loader2,
   Eye,
-  Edit,
-  Trash2,
   ToggleLeft,
   ToggleRight,
-  MessageSquare,
   Phone,
   MapPin,
-  AlertCircle,
   ShieldAlert,
+  Sparkles,
+  Wand2,
+  BrainCircuit,
+  Copy,
+  CheckCheck,
+  Zap,
+  BarChart2,
 } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
@@ -59,6 +62,16 @@ export default function ProviderDashboard() {
   const [submitting, setSubmitting] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
 
+  // AI state
+  const [aiLoading, setAiLoading] = useState('');
+  const [modalPricing, setModalPricing] = useState(null);
+  const [availResult, setAvailResult] = useState(null);
+  const [descResult, setDescResult] = useState(null);
+  const [priceResult, setPriceResult] = useState(null);
+  const [copied, setCopied] = useState(false);
+  // Standalone AI form (AI Tools tab)
+  const [aiForm, setAiForm] = useState({ title: '', category: 'electrician', experience: '', location: '', jobType: '', skills: '' });
+
   // New service form
   const [newService, setNewService] = useState({
     title: '',
@@ -66,6 +79,8 @@ export default function ProviderDashboard() {
     description: '',
     pricePerHour: '',
     experience: '',
+    location: '',
+    jobType: '',
     skills: '',
     serviceRadius: 5,
   });
@@ -156,7 +171,53 @@ export default function ProviderDashboard() {
     }
   };
 
-// Removed getMockStats, getMockServices, getMockBookings
+  // ── AI helper ────────────────────────────────────────────────────────────
+  const callAI = useCallback(async (type, source) => {
+    const form = source === 'standalone' ? aiForm : newService;
+    const key = source === 'standalone' ? `${type}_sa` : type;
+    setAiLoading(key);
+    try {
+      const isGet = type === 'availability';
+      const url = isGet
+        ? `${API_BASE_URL}/v1/skills/provider/ai/availability`
+        : `${API_BASE_URL}/v1/skills/provider/ai/${type}`;
+      const opts = { method: isGet ? 'GET' : 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include' };
+      if (!isGet) {
+        opts.body = JSON.stringify({
+          service:        form.title || form.category,
+          category:       form.category,
+          experience:     Number(form.experience) || 0,
+          location:       form.location || 'Lucknow',
+          jobType:        form.jobType || '',
+          specialization: form.jobType || '',
+          skills:         (form.skills || '').split(',').map(s => s.trim()).filter(Boolean),
+        });
+      }
+      const res = await fetch(url, opts);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || 'AI request failed');
+      if (source === 'modal') {
+        if (type === 'pricing') {
+          setModalPricing(json.data);
+          const mid = Math.round(((json.data?.recommendedPrice?.min || 0) + (json.data?.recommendedPrice?.max || 0)) / 2);
+          if (mid && !newService.pricePerHour) setNewService(p => ({ ...p, pricePerHour: String(mid) }));
+        }
+        if (type === 'description') setNewService(p => ({ ...p, description: json.data?.description || p.description }));
+        if (type === 'availability') setAvailResult(json.data);
+      } else {
+        if (type === 'pricing')      setPriceResult(json.data);
+        if (type === 'description')  setDescResult(json.data);
+        if (type === 'availability') setAvailResult(json.data);
+      }
+    } catch (err) {
+      alert(err.message || 'AI suggestion failed. Please try again.');
+    } finally {
+      setAiLoading('');
+    }
+  }, [aiForm, newService]);
+
+  const copyText = (t) => { navigator.clipboard.writeText(t); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('en-IN', {
@@ -413,18 +474,19 @@ export default function ProviderDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto">
-          {['overview', 'services', 'bookings'].map((tab) => (
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+          {['overview', 'ai tools', 'services', 'bookings'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-3 rounded-xl font-medium capitalize transition whitespace-nowrap ${
+              className={`px-5 py-2.5 rounded-xl font-medium capitalize transition whitespace-nowrap text-sm flex items-center gap-1.5 ${
                 activeTab === tab
-                  ? 'bg-violet-600 text-white'
+                  ? 'bg-violet-600 text-white shadow shadow-violet-200 dark:shadow-violet-900'
                   : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-violet-400'
               }`}
             >
-              {tab}
+              {tab === 'ai tools' && <Sparkles className="w-3.5 h-3.5" />}
+              {tab === 'ai tools' ? 'AI Tools' : tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
@@ -485,6 +547,133 @@ export default function ProviderDashboard() {
               >
                 Manage Services →
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── AI TOOLS TAB ── */}
+        {activeTab === 'ai tools' && (
+          <div className="space-y-6">
+            {/* Hero banner */}
+            <div className="bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center gap-3 mb-1"><Sparkles className="w-6 h-6" /><h2 className="text-xl font-bold">AI-Powered Provider Tools</h2></div>
+              <p className="text-violet-100 text-sm">Get data-driven pricing, auto-generate descriptions, and discover your peak demand hours.</p>
+            </div>
+
+            {/* Pricing Assistant */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl"><IndianRupee className="w-5 h-5 text-emerald-600" /></div>
+                  <div><h3 className="font-bold text-base">AI Pricing Assistant</h3><p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Get a recommended price range based on your service, experience, location and job type.</p></div>
+                </div>
+                <button onClick={() => callAI('pricing', 'standalone')} disabled={!!aiLoading || !aiForm.title}
+                  title={!aiForm.title ? 'Enter a service name first' : ''}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium rounded-xl transition text-sm whitespace-nowrap">
+                  {aiLoading === 'pricing_sa' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} Get Suggestion
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div><label className="block text-xs font-semibold text-gray-500 mb-1">Service / Title *</label>
+                  <input value={aiForm.title} onChange={e => setAiForm(f => ({...f, title: e.target.value}))} placeholder="e.g., Plumbing Service" className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none text-sm" /></div>
+                <div><label className="block text-xs font-semibold text-gray-500 mb-1">Category</label>
+                  <select value={aiForm.category} onChange={e => setAiForm(f => ({...f, category: e.target.value}))} className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none text-sm">
+                    {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}
+                  </select></div>
+                <div><label className="block text-xs font-semibold text-gray-500 mb-1">Location</label>
+                  <input value={aiForm.location} onChange={e => setAiForm(f => ({...f, location: e.target.value}))} placeholder="Lucknow" className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none text-sm" /></div>
+                <div><label className="block text-xs font-semibold text-gray-500 mb-1">Experience (years)</label>
+                  <input type="number" min="0" value={aiForm.experience} onChange={e => setAiForm(f => ({...f, experience: e.target.value}))} placeholder="3" className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none text-sm" /></div>
+                <div className="sm:col-span-2"><label className="block text-xs font-semibold text-gray-500 mb-1">Job Type</label>
+                  <input value={aiForm.jobType} onChange={e => setAiForm(f => ({...f, jobType: e.target.value}))} placeholder="Pipe leakage, home wiring, AC installation…" className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none text-sm" /></div>
+              </div>
+              {priceResult && (
+                <div className="mt-4 rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/30 p-4 space-y-3">
+                  <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">Recommended Price</p>
+                  <p className="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">₹{priceResult.recommendedPrice?.min} <span className="text-lg font-normal">–</span> ₹{priceResult.recommendedPrice?.max}<span className="text-sm font-medium ml-1">/hr</span></p>
+                  {priceResult.basis?.length > 0 && (
+                    <ul className="space-y-1">{priceResult.basis.map((b,i) => <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400"><span className="text-emerald-500 flex-shrink-0">✓</span>{b}</li>)}</ul>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Description Generator */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 bg-violet-100 dark:bg-violet-900/30 rounded-xl"><Wand2 className="w-5 h-5 text-violet-600" /></div>
+                  <div><h3 className="font-bold text-base">AI Job Description Generator</h3><p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Generate a professional service description instantly — ideal for onboarding.</p></div>
+                </div>
+                <button onClick={() => callAI('description', 'standalone')} disabled={!!aiLoading || !aiForm.title}
+                  title={!aiForm.title ? 'Fill the Pricing form above first' : ''}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white font-medium rounded-xl transition text-sm whitespace-nowrap">
+                  {aiLoading === 'description_sa' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />} Generate
+                </button>
+              </div>
+              <div><label className="block text-xs font-semibold text-gray-500 mb-1">Skills / Specialization (comma-separated)</label>
+                <input value={aiForm.skills} onChange={e => setAiForm(f => ({...f, skills: e.target.value}))} placeholder="Wiring, Fault detection, AC repair…" className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none text-sm" />
+                <p className="text-xs text-gray-400 mt-1">Uses service name, category &amp; experience from the Pricing form above.</p>
+              </div>
+              {descResult && (
+                <div className="mt-4 rounded-xl border border-violet-200 dark:border-violet-800/50 bg-violet-50 dark:bg-violet-950/30 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-violet-700 dark:text-violet-400 uppercase tracking-wide">Generated Description</p>
+                    <button onClick={() => copyText(descResult.description)} className="flex items-center gap-1.5 text-xs font-medium text-violet-600 hover:text-violet-800 transition">
+                      {copied ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}{copied ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{descResult.description}</p>
+                  <div className="flex flex-wrap gap-2">{descResult.highlights?.map((h,i) => <span key={i} className="px-2.5 py-1 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs rounded-full font-medium">{h}</span>)}</div>
+                </div>
+              )}
+            </div>
+
+            {/* Availability Optimizer */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 bg-fuchsia-100 dark:bg-fuchsia-900/30 rounded-xl"><BrainCircuit className="w-5 h-5 text-fuchsia-600" /></div>
+                  <div><h3 className="font-bold text-base">AI Availability Optimizer</h3><p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Analyzes your last 90 days of bookings to find the best time slots.</p></div>
+                </div>
+                <button onClick={() => callAI('availability', 'standalone')} disabled={aiLoading === 'availability_sa'}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-700 disabled:bg-fuchsia-400 text-white font-medium rounded-xl transition text-sm whitespace-nowrap">
+                  {aiLoading === 'availability_sa' ? <Loader2 className="w-4 h-4 animate-spin" /> : <BarChart2 className="w-4 h-4" />} Analyze Schedule
+                </button>
+              </div>
+              {availResult ? (
+                <div className="space-y-4">
+                  <div className="rounded-xl bg-fuchsia-50 dark:bg-fuchsia-900/20 border border-fuchsia-100 dark:border-fuchsia-800/40 p-4">
+                    <div className="flex items-start gap-3"><Zap className="w-5 h-5 text-fuchsia-600 flex-shrink-0 mt-0.5" />
+                      <div><p className="font-semibold text-fuchsia-700 dark:text-fuchsia-300">{availResult.recommendation}</p>
+                        {availResult.fallback && <p className="text-xs text-fuchsia-500 mt-1">* Based on platform averages (no personal history yet)</p>}
+                        <p className="text-xs text-gray-400 mt-1">Analyzed {availResult.bookingsAnalyzed} booking{availResult.bookingsAnalyzed !== 1 ? 's' : ''} (last 90 days).</p>
+                      </div>
+                    </div>
+                  </div>
+                  {availResult.daySummary?.length > 0 && (() => {
+                    const maxTotal = Math.max(...availResult.daySummary.map(d => d.total), 1);
+                    return (
+                      <div><p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Demand by Day</p>
+                        <div className="space-y-2">{availResult.daySummary.map(d => (
+                          <div key={d.day} className={`flex items-center gap-3 p-2 rounded-lg ${d.isBest ? 'bg-fuchsia-50 dark:bg-fuchsia-900/20 ring-1 ring-fuchsia-200 dark:ring-fuchsia-800' : ''}`}>
+                            <span className={`text-xs font-semibold w-8 flex-shrink-0 ${d.isBest ? 'text-fuchsia-700 dark:text-fuchsia-300' : 'text-gray-400'}`}>{d.day.slice(0,3)}</span>
+                            <div className="flex-1 h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                              <div className={`h-full rounded-full ${d.isBest ? 'bg-fuchsia-500' : 'bg-gray-300 dark:bg-gray-600'}`} style={{width:`${Math.max(4,(d.total/maxTotal)*100)}%`}} />
+                            </div>
+                            <span className="text-xs text-gray-400 w-8 text-right">{d.total > 0 ? d.total : '–'}</span>
+                            {d.isBest && <span className="text-xs font-bold px-2 py-0.5 bg-fuchsia-600 text-white rounded-full">Best</span>}
+                          </div>))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 p-6 text-center text-sm text-gray-400">
+                  Click &quot;Analyze Schedule&quot; to see AI-powered slot recommendations.
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -689,9 +878,12 @@ export default function ProviderDashboard() {
 
       {/* New Service Modal */}
       {showNewServiceModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="font-bold text-xl mb-6">Add New Service</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold text-xl">Add New Service</h3>
+              <button onClick={() => { setShowNewServiceModal(false); setModalPricing(null); }} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"><XCircle className="w-5 h-5 text-gray-400" /></button>
+            </div>
             <form onSubmit={handleCreateService} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Service Title *</label>
@@ -721,43 +913,55 @@ export default function ProviderDashboard() {
                 </select>
               </div>
 
+              {/* Location + Job Type */}
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="block text-sm font-medium mb-1.5">Location</label>
+                  <input type="text" value={newService.location} onChange={e => setNewService({...newService, location: e.target.value})} placeholder="Lucknow" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none" /></div>
+                <div><label className="block text-sm font-medium mb-1.5">Job Type</label>
+                  <input type="text" value={newService.jobType} onChange={e => setNewService({...newService, jobType: e.target.value})} placeholder="Pipe leakage, wiring…" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none" /></div>
+              </div>
+
+              {/* Description with AI Generate */}
               <div>
-                <label className="block text-sm font-medium mb-2">Description *</label>
-                <textarea
-                  value={newService.description}
-                  onChange={(e) => setNewService({ ...newService, description: e.target.value })}
-                  required
-                  rows={3}
-                  placeholder="Describe your service..."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none resize-none"
-                />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-sm font-medium">Description *</label>
+                  <button type="button" onClick={() => callAI('description', 'modal')} disabled={aiLoading === 'description' || !newService.title}
+                    title={!newService.title ? 'Enter a title first' : 'Auto-generate with AI'}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100 disabled:opacity-50 dark:bg-violet-900/30 dark:text-violet-300 transition">
+                    {aiLoading === 'description' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />} AI Generate
+                  </button>
+                </div>
+                <textarea value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})}
+                  required rows={3} placeholder="Describe your service…"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none resize-none" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Price per Hour (₹) *</label>
-                  <input
-                    type="number"
-                    value={newService.pricePerHour}
-                    onChange={(e) => setNewService({ ...newService, pricePerHour: e.target.value })}
-                    required
-                    min="0"
-                    placeholder="300"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none"
-                  />
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-sm font-medium">Price/Hour (₹) *</label>
+                    <button type="button" onClick={() => callAI('pricing', 'modal')} disabled={aiLoading === 'pricing' || !newService.title}
+                      title={!newService.title ? 'Enter a title first' : 'Get AI price suggestion'}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 dark:bg-emerald-900/30 dark:text-emerald-300 transition">
+                      {aiLoading === 'pricing' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} AI Price
+                    </button>
+                  </div>
+                  <input type="number" value={newService.pricePerHour} onChange={e => setNewService({...newService, pricePerHour: e.target.value})}
+                    required min="0" placeholder="300" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Experience (years)</label>
-                  <input
-                    type="number"
-                    value={newService.experience}
-                    onChange={(e) => setNewService({ ...newService, experience: e.target.value })}
-                    min="0"
-                    placeholder="5"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none"
-                  />
+                  <label className="block text-sm font-medium mb-1.5">Experience (years)</label>
+                  <input type="number" value={newService.experience} onChange={e => setNewService({...newService, experience: e.target.value})}
+                    min="0" placeholder="5" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 outline-none" />
                 </div>
               </div>
+              {/* Modal pricing suggestion */}
+              {modalPricing && (
+                <div className="rounded-xl border border-emerald-100 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-900/20 p-4 space-y-2">
+                  <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">💡 Recommended: ₹{modalPricing.recommendedPrice?.min} – ₹{modalPricing.recommendedPrice?.max}/hr</p>
+                  <ul className="space-y-0.5">{modalPricing.basis?.map((b,i) => <li key={i} className="text-xs text-gray-500 flex items-start gap-1.5"><span className="text-emerald-500 flex-shrink-0">✓</span>{b}</li>)}</ul>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium mb-2">Skills (comma-separated)</label>
@@ -783,11 +987,8 @@ export default function ProviderDashboard() {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowNewServiceModal(false)}
-                  className="flex-1 py-3 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition font-medium"
-                >
+                <button type="button" onClick={() => { setShowNewServiceModal(false); setModalPricing(null); }}
+                  className="flex-1 py-3 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition font-medium">
                   Cancel
                 </button>
                 <button

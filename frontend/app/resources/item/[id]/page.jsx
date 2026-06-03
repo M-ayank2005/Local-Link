@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Star, Wrench, TrendingUp, CalendarDays, Shield } from 'lucide-react';
+import { ArrowLeft, Star, Wrench, TrendingUp, CalendarDays, Shield, Sparkles } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1';
 
@@ -18,6 +18,9 @@ export default function ResourceDetailPage() {
   const [resource, setResource] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const [bundle, setBundle] = useState(null);
+  const [isBundleLoading, setIsBundleLoading] = useState(false);
 
   useEffect(() => {
     const fetchResource = async () => {
@@ -38,6 +41,26 @@ export default function ResourceDetailPage() {
     };
     fetchResource();
   }, [id]);
+
+  useEffect(() => {
+    if (resource && resource._id) {
+      const fetchBundle = async () => {
+        setIsBundleLoading(true);
+        try {
+          const res = await fetch(`${API_BASE}/resources/ai/bundle/${resource._id}`, { credentials: 'include' });
+          const data = await res.json();
+          if (res.ok && data.data && data.data.length > 0) {
+            setBundle(data);
+          }
+        } catch (err) {
+          console.error("Bundle load error", err);
+        } finally {
+          setIsBundleLoading(false);
+        }
+      };
+      fetchBundle();
+    }
+  }, [resource]);
 
   if (isLoading) {
     return (
@@ -119,6 +142,38 @@ export default function ResourceDetailPage() {
               </ul>
             </div>
           )}
+
+          {/* Bundle Recommendations */}
+          {(isBundleLoading || bundle) && (
+            <div className="pt-6 border-t mt-6">
+              <h3 className="text-lg font-bold flex items-center gap-2 mb-1">
+                <Sparkles className="w-5 h-5 text-violet-500" /> 
+                {bundle?.aiData?.bundleTitle || 'Suggested Bundle'}
+              </h3>
+              {isBundleLoading ? (
+                <div className="h-24 bg-card border rounded-xl animate-pulse mt-3" />
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground mb-4">{bundle?.aiData?.reason}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {bundle?.data?.map(item => (
+                      <Link key={item._id} href={`/resources/item/${item._id}`}>
+                        <div className="group flex items-center gap-3 p-3 rounded-xl border bg-card hover:border-violet-500/50 hover:shadow-sm transition-all cursor-pointer">
+                          <div className="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center flex-shrink-0">
+                            <Wrench className="w-5 h-5 text-violet-500" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm truncate group-hover:text-violet-600 transition-colors">{item.title}</p>
+                            <p className="text-xs text-muted-foreground">₹{item.pricePerDay}/day</p>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -150,27 +205,7 @@ export default function ResourceDetailPage() {
             </div>
           </div>
 
-          {/* ML Demand Forecast */}
-          <div className="rounded-2xl border bg-card p-4 space-y-2">
-            <h3 className="text-sm font-semibold flex items-center gap-1">
-              <TrendingUp className="w-4 h-4 text-violet-500" /> Demand Forecast
-            </h3>
-            {forecast?.source === 'unavailable' ? (
-              <p className="text-xs text-muted-foreground">ML service unavailable</p>
-            ) : (
-              <>
-                <p className="text-lg font-bold">{forecast?.predicted_bookings_next_7_days} bookings</p>
-                <p className="text-xs text-muted-foreground">expected next 7 days</p>
-                <div className="w-full bg-secondary rounded-full h-1.5 mt-1">
-                  <div
-                    className="bg-violet-500 h-1.5 rounded-full"
-                    style={{ width: `${(forecast?.confidence ?? 0) * 100}%` }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">{((forecast?.confidence ?? 0) * 100).toFixed(0)}% confidence</p>
-              </>
-            )}
-          </div>
+
         </div>
       </div>
     </div>

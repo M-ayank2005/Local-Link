@@ -38,6 +38,9 @@ exports.verifyShop = async (req, res) => {
 // @access  Private/Admin
 exports.addShop = async (req, res) => {
     try {
+        if (!req.body.owner) {
+            req.body.owner = req.user ? req.user.id : '65d1c2345678901234567891';
+        }
         const shop = await Shop.create(req.body);
         res.status(201).json({ success: true, data: shop });
     } catch (error) {

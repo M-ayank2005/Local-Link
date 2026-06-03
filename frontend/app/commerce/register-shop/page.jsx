@@ -45,7 +45,7 @@ export default function RegisterShopPage() {
     
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${API_BASE_URL}/admin/shops`, {
+      const response = await fetch(`${API_BASE_URL}/v1/admin/shops`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
