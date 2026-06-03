@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MapPin, Wrench, Search, Filter, Star, TrendingUp, BellPlus, X, CheckCircle, Sparkles } from 'lucide-react';
+import { resolveApiV1Base } from '@/lib/apiBase';
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1';
+const API_BASE = resolveApiV1Base();
 
 const CATEGORY_LABELS = {
   drill: 'Drill',

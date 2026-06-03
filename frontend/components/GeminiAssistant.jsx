@@ -7,8 +7,9 @@ import {
   Package, HelpCircle, ArrowLeft, ExternalLink, Tag, ChevronRight
 } from "lucide-react";
 import Link from "next/link";
+import { resolveApiV1Base } from "@/lib/apiBase";
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1";
+const API_BASE = resolveApiV1Base();
 
 const MOCK_ITEMS = [
   { _id: "m1", title: "Bosch Drill Machine", category: "drill", condition: "good", pricePerDay: 80, depositAmount: 600, owner: { fullName: "Rajan Mehta" } },

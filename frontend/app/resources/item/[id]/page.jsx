@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Star, Wrench, TrendingUp, CalendarDays, Shield, Sparkles } from 'lucide-react';
+import { resolveApiV1Base } from '@/lib/apiBase';
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1';
+const API_BASE = resolveApiV1Base();
 
 const CONDITION_COLORS = {
   new: 'text-emerald-500 bg-emerald-500/10',
