@@ -6,15 +6,9 @@ import {
   Wrench, Plus, Edit2, Trash2, X, Check,
   BookOpen, TrendingUp, BellPlus, Users, Calendar, IndianRupee, Sparkles
 } from 'lucide-react';
+import { resolveApiV1Base } from '@/lib/apiBase';
 
-const API_BASE = (() => {
-  const base = (
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    'http://localhost:5000/api'
-  ).replace(/\/$/, '');
-  return base.endsWith('/v1') ? base : `${base}/v1`;
-})();
+const API_BASE = resolveApiV1Base();
 
 const CATEGORIES = ['drill', 'ladder', 'projector', 'tent', 'tool', 'appliance', 'sports', 'other'];
 const CONDITIONS = ['new', 'good', 'fair'];

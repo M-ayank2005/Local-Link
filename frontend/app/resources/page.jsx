@@ -3,15 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MapPin, Wrench, Search, Filter, Star, TrendingUp, BellPlus, X, CheckCircle, Sparkles } from 'lucide-react';
+import { resolveApiV1Base } from '@/lib/apiBase';
 
-const API_BASE = (() => {
-  const base = (
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    'http://localhost:5000/api'
-  ).replace(/\/$/, '');
-  return base.endsWith('/v1') ? base : `${base}/v1`;
-})();
+const API_BASE = resolveApiV1Base();
 
 const CATEGORY_LABELS = {
   drill: 'Drill',

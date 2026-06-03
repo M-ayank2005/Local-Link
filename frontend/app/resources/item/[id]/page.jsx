@@ -4,15 +4,9 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Star, Wrench, TrendingUp, CalendarDays, Shield, Sparkles } from 'lucide-react';
+import { resolveApiV1Base } from '@/lib/apiBase';
 
-const API_BASE = (() => {
-  const base = (
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    'http://localhost:5000/api'
-  ).replace(/\/$/, '');
-  return base.endsWith('/v1') ? base : `${base}/v1`;
-})();
+const API_BASE = resolveApiV1Base();
 
 const CONDITION_COLORS = {
   new: 'text-emerald-500 bg-emerald-500/10',
