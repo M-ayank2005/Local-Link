@@ -2,7 +2,6 @@
 
 <div align="center">
 
-<img src="https://img.shields.io/github/license/iiitl/Local-Link?style=for-the-badge&color=blue" />
 <img src="https://img.shields.io/github/issues/iiitl/Local-Link?style=for-the-badge&color=green" />
 <img src="https://img.shields.io/github/stars/iiitl/Local-Link?style=for-the-badge&color=gold" />
 <img src="https://img.shields.io/github/forks/iiitl/Local-Link?style=for-the-badge&color=orange" />
