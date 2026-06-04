@@ -17,8 +17,10 @@ export default function CreateFoodListing() {
     description: '',
     price: 0,
     quantity: 1,
-    ingredients: '', 
-    expiryDate: ''
+    ingredients: '',
+    expiryDate: '',
+    storageMethod: 'room_temp',
+    packagingType: 'open',
   });
 
   useEffect(() => {
@@ -143,6 +145,36 @@ export default function CreateFoodListing() {
               <input type="text" name="ingredients" value={formData.ingredients} onChange={handleChange} 
                 className="w-full p-3.5 bg-transparent border border-gray-300 dark:border-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition" 
                 placeholder="Potato, Flour, Spices" />
+            </div>
+
+            {/* AI Safety Predictor Inputs */}
+            <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-emerald-600 dark:text-emerald-400 text-base">🤖</span>
+                <span className="text-sm font-bold text-emerald-800 dark:text-emerald-300">AI Safety Predictor Inputs</span>
+                <span className="text-xs text-emerald-600 dark:text-emerald-500">(optional — helps generate a safety suggestion)</span>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2 text-sm">Storage Method</label>
+                  <select name="storageMethod" value={formData.storageMethod} onChange={handleChange}
+                    className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+                    <option value="room_temp">🌡️ Room Temperature</option>
+                    <option value="refrigerated">❄️ Refrigerated</option>
+                    <option value="frozen">🧊 Frozen</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2 text-sm">Packaging Type</label>
+                  <select name="packagingType" value={formData.packagingType} onChange={handleChange}
+                    className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+                    <option value="open">📭 Open</option>
+                    <option value="covered">🍽️ Covered</option>
+                    <option value="airtight">📦 Airtight Container</option>
+                    <option value="vacuum_sealed">🔒 Vacuum Sealed</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             <button type="submit" disabled={loading} 

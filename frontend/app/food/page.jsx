@@ -3,7 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MapPin, Clock, Leaf, PlusCircle, ArrowLeft, ShieldAlert, User } from 'lucide-react';
+import { MapPin, Leaf, PlusCircle, ShieldAlert, User } from 'lucide-react';
+import FoodSafetyBadge from '@/components/FoodSafetyBadge';
+import DietLabels from '@/components/DietLabels';
+import ExpiryCountdown from '@/components/ExpiryCountdown';
+import FreshnessBar from '@/components/FreshnessBar';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -169,18 +173,27 @@ export default function FoodFeed() {
                         <MapPin className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" />
                         {distanceStr}
                       </div>
-                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium">
-                        <Clock className="w-4 h-4 mr-2 text-amber-500 dark:text-amber-400" />
-                        Expires: {new Date(food.expiryDate).toLocaleDateString()}
-                      </div>
+                      {/* Live expiry countdown replaces static date */}
+                      <ExpiryCountdown expiryDate={food.expiryDate} />
                     </div>
                     
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <div className="flex flex-wrap gap-2 mb-3">
                       {food.ingredients && food.ingredients.map((ingredient, index) => (
                         <span key={index} className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs px-2.5 py-1 rounded-md border border-gray-200 dark:border-gray-700">
                           {ingredient}
                         </span>
                       ))}
+                    </div>
+
+                    {/* Diet labels + CO2 saved */}
+                    <DietLabels food={food} />
+
+                    {/* Freshness bar */}
+                    <FreshnessBar createdAt={food.createdAt} expiryDate={food.expiryDate} />
+
+                    {/* AI Food Safety Predictor Badge */}
+                    <div className="mb-4">
+                      <FoodSafetyBadge food={food} />
                     </div>
 
                     <div className="pt-4 border-t border-gray-100 dark:border-gray-800">

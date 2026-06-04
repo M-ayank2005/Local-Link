@@ -25,6 +25,16 @@ const foodListingSchema = new mongoose.Schema({
     required: true
   },
   ingredients: [String],
+  storageMethod: {
+    type: String,
+    enum: ['room_temp', 'refrigerated', 'frozen'],
+    default: 'room_temp'
+  },
+  packagingType: {
+    type: String,
+    enum: ['open', 'covered', 'airtight', 'vacuum_sealed'],
+    default: 'open'
+  },
   temperatureLogs: [Number], 
   season: {
     type: String,

@@ -6,15 +6,17 @@ const FoodOrder = require('../../models/food/FoodOrder');
 // @access  Private (resident, shopkeeper)
 exports.createFoodListing = async (req, res) => {
   try {
-    const { title, description, price, quantity, ingredients, season, expiryDate, coordinates } = req.body;
+    const { title, description, price, quantity, ingredients, season, expiryDate, coordinates, storageMethod, packagingType } = req.body;
 
     const newFood = new FoodListing({
       title,
       description,
-      provider: req.user._id, // Ensure we use _id
+      provider: req.user._id,
       price,
       quantity,
       ingredients,
+      storageMethod,
+      packagingType,
       season,
       expiryDate,
       location: {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, AlertCircle, ShoppingBag, Truck, Calendar, Phone, User } from 'lucide-react';
+import FoodSafetyBadge from '@/components/FoodSafetyBadge';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -244,7 +245,10 @@ function ListingCard({ listing }) {
           Available
         </span>
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 h-10">{listing.description}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3 h-10">{listing.description}</p>
+      <div className="mb-3">
+        <FoodSafetyBadge food={listing} />
+      </div>
       <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400 border-t pt-3 dark:border-gray-700">
          Stock: {listing.quantity}
       </div>
